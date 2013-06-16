@@ -5,7 +5,6 @@ require 'plotrb/version'
 Gem::Specification.new do |spec|
   spec.name          = 'plotrb'
   spec.version       = Plotrb::VERSION
-  spec.date          = Date.today.to_s
   spec.authors       = ['Zuhao Wan']
   spec.email         = 'wanzuhao@gmail.com'
   spec.description   = %q{Plotrb is a plotting tool in Ruby.}
