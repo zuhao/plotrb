@@ -1,17 +1,18 @@
-# rdoc generated
-rdoc
-
-# yard generated
-doc
-.yardoc
-
-# bundler
+*.gem
+*.rbc
 .bundle
-
-# jeweler generated
+.config
+.yardoc
+Gemfile.lock
+InstalledFiles
+_yardoc
+coverage
+doc/
+lib/bundler/man
 pkg
-
-# Rubymine
+rdoc
+spec/reports
+test/tmp
+test/version_tmp
+tmp
 .idea
-
-.rspec
