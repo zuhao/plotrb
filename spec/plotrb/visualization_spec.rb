@@ -84,9 +84,9 @@ describe 'Visualization' do
     end
 
     it 'raises error when any padding value is not a number' do
-      expect { @vis.padding = {:top => 4, :left => :foo,
-                               :right => 'bar', :bottom => nil} }.
-          to raise_error ::Plotrb::InvalidInputError
+      expect { @vis.padding = {
+          :top => 4, :left => :foo, :right => 'bar', :bottom => nil
+      } }.to raise_error ::Plotrb::InvalidInputError
     end
 
   end
