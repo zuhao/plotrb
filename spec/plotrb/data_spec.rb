@@ -41,7 +41,7 @@ describe 'Data' do
 
       let(:valid_json) { {
           :type => :json,
-          :parse => {'modified_on' => :date},
+          :parse => {:modified_on => :date},
           :property => 'values.features'
       } }
       let(:invalid_json) { {:foo => :bar} }
@@ -64,7 +64,7 @@ describe 'Data' do
       end
 
       it 'invalidates if parse object has unknown data type' do
-        @data.send(:valid_json_format?, {:parse => {'foo' => :bar }}).
+        @data.send(:valid_json_format?, {:parse => {:foo => :bar }}).
             should be_false
       end
 
@@ -82,7 +82,7 @@ describe 'Data' do
 
       let(:valid_csv) { {
           :type => :csv,
-          :parse => {'modified_on' => :date},
+          :parse => {:modified_on => :date},
           :property => 'values.features'
       } }
       let(:invalid_csv) { {:foo => :bar}}
@@ -105,7 +105,7 @@ describe 'Data' do
       end
 
       it 'invalidates if parse object has unknown data type' do
-        @data.send(:valid_csv_format?, {:parse => {'foo' => :bar }}).
+        @data.send(:valid_csv_format?, {:parse => {:foo => :bar }}).
             should be_false
       end
 
@@ -119,7 +119,7 @@ describe 'Data' do
 
       let(:valid_tsv) { {
           :type => :tsv,
-          :parse => {'modified_on' => :date},
+          :parse => {:modified_on => :date},
           :property => 'values.features'
       } }
       let(:invalid_tsv) { {:foo => :bar}}
@@ -142,7 +142,7 @@ describe 'Data' do
       end
 
       it 'invalidates if parse object has unknown data type' do
-        @data.send(:valid_tsv_format?, {:parse => {'foo' => :bar }}).
+        @data.send(:valid_tsv_format?, {:parse => {:foo => :bar }}).
             should be_false
       end
 
@@ -176,7 +176,10 @@ describe 'Data' do
       @data.source.should == 'foo'
     end
 
-    it 'raises error if source does not exist'
+    it 'raises error if source does not exist' do
+      @data.stub(:valid_source?).and_return(false)
+      expect { @data.source = 'foo' }.to raise_error ::Plotrb::InvalidInputError
+    end
 
     it 'validates existing source'
 
