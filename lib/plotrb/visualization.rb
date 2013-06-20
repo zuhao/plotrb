@@ -1,5 +1,7 @@
 module Plotrb
 
+  # The container for all visual elements.
+  # See {https://github.com/trifacta/vega/wiki/Visualization}
   class Visualization
 
     def initialize(args={})
@@ -10,10 +12,12 @@ module Plotrb
       @padding  = args[:padding] || 5
     end
 
+    # @return [String] unique name of the visualization
     def name
       @name
     end
 
+    # @param name [String] unique name of the visualization
     def name=(name)
       @name = name.to_s
       if @name.nil? || @name.empty?
@@ -21,10 +25,12 @@ module Plotrb
       end
     end
 
+    # @return [Integer] the total width of the data rectangle
     def width
       @width
     end
 
+    # @param width [Integer] the total width of the data rectangle
     def width=(width)
       if width.respond_to?(:to_i)
         @width = width.to_i
@@ -33,10 +39,12 @@ module Plotrb
       end
     end
 
+    # @return [Integer] the total height of the data rectangle
     def height
       @height
     end
 
+    # @param height [Integer] the total height of the data rectangle
     def height=(height)
       if height.respond_to?(:to_i)
         @height = height.to_i
@@ -45,10 +53,14 @@ module Plotrb
       end
     end
 
+    # @return [Array(Integer, Integer)] the width and height of the on-screen
+    #   viewport
     def viewport
       @viewport
     end
 
+    # @param viewport [Array(Integer, Integer), nil] the width and height of the
+    #   on-screen viewport
     def viewport=(viewport)
       if viewport
         if viewport.is_a?(Array)
@@ -66,10 +78,14 @@ module Plotrb
       raise ::Plotrb::InvalidInputError
     end
 
+    # @return [Integer, Hash] the internal padding from the visualization edge
+    #   to the data rectangle
     def padding
       @padding
     end
 
+    # @param padding [Integer, Hash] the internal padding from the visualization
+    #   edge to the data rectangle
     def padding=(padding)
       @padding = {}
       [:top, :left, :right, :bottom].each do |pos|

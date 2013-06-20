@@ -3,6 +3,8 @@ require 'uri'
 
 module Plotrb
 
+  # The basic tabular data model used by Vega.
+  # See {https://github.com/trifacta/vega/wiki/Data}
   class Data
 
     def initialize(args={})
@@ -14,10 +16,12 @@ module Plotrb
       @transform  = args[:transform]
     end
 
+    # @return [String] unique name of the data set
     def name
       @name
     end
 
+    # @param name [#to_s] unique name of the data set
     def name=(name)
       @name = name.to_s
       if @name.nil? || @name.empty?
@@ -25,10 +29,12 @@ module Plotrb
       end
     end
 
+    # @return [Hash, nil] the format for the data file
     def format
       @format
     end
 
+    # @param format [Hash] the format for the data file
     def format=(format)
       if format.is_a?(Hash) && format[:type] &&
           [:json, :csv, :tsv].include?(format[:type]) &&
@@ -39,20 +45,24 @@ module Plotrb
       end
     end
 
+    # @return [Hash, nil] the actual data set
     def values
       @values
     end
 
+    # @param values [Hash] the actual data set
     def values=(values)
       @values = Yajl::Parser.parse(values)
     rescue Yajl::ParseError
       raise ::Plotrb::InvalidInputError
     end
 
+    # @return [String, nil] the name of another data set to us as source
     def source
       @source
     end
 
+    # @param source [String] the name of another data set to us as source
     def source=(source)
       if valid_source?(source)
         @source = source
@@ -61,10 +71,12 @@ module Plotrb
       end
     end
 
+    # @return [String, nil] the url from which to load the data set
     def url
       @url
     end
 
+    # @param url [String] the url from which to load the data set
     def url=(url)
       u = URI.parse(url)
       if u
@@ -74,10 +86,12 @@ module Plotrb
       raise ::Plotrb::InvalidInputError
     end
 
+    # @return [Array<Transform>, nil] an array of transform definitions
     def transform
       @transform
     end
 
+    # @param transform [Array<Transform>] an array of transform definitions
     def transform=(transform)
       if valid_transform?(transform)
         @transform = transform
@@ -88,11 +102,13 @@ module Plotrb
 
   private
 
+    # @param source [String] the name of another data set to us as source
     def valid_source?(source)
       return true unless source
       #TODO: check if source data set exists.
     end
 
+    # @param format [Hash] the format object
     def valid_json_format?(format)
       valid = true
       if format[:parse]
@@ -108,6 +124,7 @@ module Plotrb
       false
     end
 
+    # (see #valid_json_format?)
     def valid_csv_format?(format)
       valid = true
       if format[:parse]
@@ -120,6 +137,7 @@ module Plotrb
       false
     end
 
+    # (see #valid_json_format?)
     def valid_tsv_format?(format)
       valid = true
       if format[:parse]
@@ -132,11 +150,10 @@ module Plotrb
       false
     end
 
+    # @param transform [nil, Array<Transform>] an array of transform definitions
     def valid_transform?(transform)
-      valid = true if transform.nil?
-      valid ||= transform.is_a?(Array) &&
+      transform.is_a?(Array) &&
           transform.reject{ |t| t.is_a? ::Plotrb::Transform }.empty?
-      valid
     end
 
   end
