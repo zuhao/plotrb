@@ -153,7 +153,7 @@ module Plotrb
     # @param transform [nil, Array<Transform>] an array of transform definitions
     def valid_transform?(transform)
       transform.is_a?(Array) &&
-          transform.reject{ |t| t.is_a? ::Plotrb::Transform }.empty?
+          transform.all? { |t| t.is_a?(::Plotrb::Transform) }
     end
 
   end

@@ -23,16 +23,16 @@ describe 'Data' do
 
   context 'when setting format' do
 
-    it 'raises error when format is not a hash' do
+    it 'raises error if format is not a hash' do
       expect { @data.format = :foo }.to raise_error ::Plotrb::InvalidInputError
     end
 
-    it 'raises error when format does not has type' do
+    it 'raises error if format does not has type' do
       expect { @data.format = {:foo => :bar} }.
           to raise_error ::Plotrb::InvalidInputError
     end
 
-    it 'raises error when format type is not json, csv, or tsv' do
+    it 'raises error if format type is not json, csv, or tsv' do
       expect { @data.format = {:type => :foo} }.
           to raise_error ::Plotrb::InvalidInputError
     end
@@ -157,8 +157,8 @@ describe 'Data' do
   context 'when setting values' do
 
     it 'sets values if valid JSON' do
-      @data.values = '{"foo":1, "bar":{"gee":2}}'
-      @data.values.should == {'foo'=>1, 'bar'=>{'gee'=>2}}
+      @data.values = '{"foo":1, "bar":{"baz":2}}'
+      @data.values.should == {'foo'=>1, 'bar'=>{'baz'=>2}}
     end
 
     it 'raises error if values are invalid JSON' do
@@ -211,10 +211,10 @@ describe 'Data' do
 
   context 'when setting transform' do
 
-    class Gee; end
+    class Baz; end
 
-    let(:foo) { ::Plotrb::Transform.new }
-    let(:bar) { [:foo, Gee.new]}
+    let(:foo) { ::Plotrb::Transform.stub(:new) }
+    let(:bar) { [:foo, Baz.new]}
     let(:valid_transform) { [:foo, :foo] }
 
     it 'invalidates if transforms are not in an array' do
