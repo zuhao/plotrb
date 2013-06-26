@@ -32,7 +32,11 @@ module Plotrb
     def array(args)
       valid = args[:fields] && ([:fields] - args.keys).empty?
       valid &&= array_of_strings?(args[:fields])
-      valid ? set_properties(args) : raise ::Plotrb::InvalidInputError
+      if valid
+        set_properties(args)
+      else
+        raise ::Plotrb::InvalidInputError
+      end
     end
 
     # @param args [Hash] properties for copy transform
@@ -41,7 +45,11 @@ module Plotrb
           ([:from, :fields, :as] - args.keys).empty?
       valid &&= array_of_strings?(args[:fields])
       valid &&= args[:as].nil? || args[:as].size == args[:fields].size
-      valid ? set_properties(args) : raise ::Plotrb::InvalidInputError
+      if valid
+        set_properties(args)
+      else
+        raise ::Plotrb::InvalidInputError
+      end
     end
 
     # @param args [Hash] properties for facet transform
@@ -50,7 +58,11 @@ module Plotrb
       valid &&= array_of_strings?(args[:keys])
       valid &&= args[:sort].nil? || args[:sort].is_a?(String) ||
           array_of_strings?(args[:sort])
-      valid ? set_properties(args) : raise ::Plotrb::InvalidInputError
+      if valid
+        set_properties(args)
+      else
+        raise ::Plotrb::InvalidInputError
+      end
     end
 
     # @param args [Hash] properties for filter transform
@@ -58,7 +70,11 @@ module Plotrb
     def filter(args)
       valid = args[:test] && ([:test] - args.keys).empty?
       valid &&= args[:test].is_a?(String)
-      valid ? set_properties(args) : raise ::Plotrb::InvalidInputError
+      if valid
+        set_properties(args)
+      else
+        raise ::Plotrb::InvalidInputError
+      end
     end
 
     # @param args [nil] properties for flatten transform
@@ -72,14 +88,22 @@ module Plotrb
       valid = args[:field] && args[:expr] &&
           ([:field, :expr] - args.keys).empty?
       valid &&= args[:field].is_a?(String) && args[:expr].is_a?(String)
-      valid ? set_properties(args) : raise ::Plotrb::InvalidInputError
+      if valid
+        set_properties(args)
+      else
+        raise ::Plotrb::InvalidInputError
+      end
     end
 
     # @param args [Hash] properties for sort transform
     def sort(args)
       valid = args[:by] && ([:by] - args.keys).empty?
       valid &&= args[:by].is_a?(String) || array_of_strings?(args[:by])
-      valid ? set_properties(args) : raise ::Plotrb::InvalidInputError
+      if valid
+        set_properties(args)
+      else
+        raise ::Plotrb::InvalidInputError
+      end
     end
 
     # @param args [Hash] properties for stats transform
@@ -87,14 +111,22 @@ module Plotrb
       valid = args[:value] && (args.keys - [:value, :median]).empty?
       valid &&= args[:value].is_a?(String)
       valid &&= args[:median].nil? || [true, false].include?([:median])
-      valid ? set_properties(args) : raise ::Plotrb::InvalidInputError
+      if valid
+        set_properties(args)
+      else
+        raise ::Plotrb::InvalidInputError
+      end
     end
 
     # @param args [Hash] properties for unique transform
     def unique(args)
       valid = args[:field] && args[:as] && (args.keys - [:field, :as]).empty?
       valid &&= args[:field].is_a?(String) && args[:as].is_a?(String)
-      valid ? set_properties(args) : raise ::Plotrb::InvalidInputError
+      if valid
+        set_properties(args)
+      else
+        raise ::Plotrb::InvalidInputError
+      end
     end
 
     # @param args [Hash] properties for zip transform
@@ -103,7 +135,11 @@ module Plotrb
           (args.keys - [:key, :with, :as, :withKey, :default]).empty?
       valid &&= args[:key].is_a?(String) && args[:with].is_a?(String) &&
           args[:as].is_a?(String) && args[:withKey].is_a?(String)
-      valid ? set_properties(args) : raise ::Plotrb::InvalidInputError
+      if valid
+        set_properties(args)
+      else
+        raise ::Plotrb::InvalidInputError
+      end
     end
 
     # Visual Encoding Transforms
@@ -148,9 +184,19 @@ module Plotrb
 
     end
 
-  private
+    # override attr_accessor to keep track of properties set as attr_accessors
+    def self.attr_accessor(*vars)
+      @properties ||= []
+      @properties.concat(vars)
+      super(*vars)
+    end
 
-    #TODO: Keep track of properties
+    # @return [Array<Symbol>] properties of the particular Transform instance
+    def properties
+      self.singleton_class.instance_variable_get(:@properties)
+    end
+
+    # @param args [Hash] properties in the form of a Hash
     def set_properties(args)
       args.each do |k, v|
         # use singleton_class here as the properties are for this particular
@@ -161,6 +207,8 @@ module Plotrb
         self.instance_variable_set("@#{k}", v)
       end
     end
+
+  private
 
     def valid_type?(type)
       TYPES.include?(type) || TYPES.include?(type.to_sym)
