@@ -30,7 +30,7 @@ module Plotrb
 
     # @param args [Hash] properties for array transform
     def array(args)
-      valid = args[:fields] && ([:fields] - args.keys).empty?
+      valid = args[:fields] && (args.keys- [:fields]).empty?
       valid &&= array_of_strings?(args[:fields])
       if valid
         set_properties(args)
@@ -42,7 +42,7 @@ module Plotrb
     # @param args [Hash] properties for copy transform
     def copy(args)
       valid = args[:from] && args[:fields] &&
-          ([:from, :fields, :as] - args.keys).empty?
+          (args.keys - [:from, :fields, :as]).empty?
       valid &&= array_of_strings?(args[:fields])
       valid &&= args[:as].nil? || args[:as].size == args[:fields].size
       if valid
@@ -54,7 +54,7 @@ module Plotrb
 
     # @param args [Hash] properties for facet transform
     def facet(args)
-      valid = args[:keys] && ([:keys, :sort] - args.keys).empty?
+      valid = args[:keys] && (args.keys - [:keys, :sort]).empty?
       valid &&= array_of_strings?(args[:keys])
       valid &&= args[:sort].nil? || args[:sort].is_a?(String) ||
           array_of_strings?(args[:sort])
@@ -68,7 +68,7 @@ module Plotrb
     # @param args [Hash] properties for filter transform
     #TODO: support javascript Math
     def filter(args)
-      valid = args[:test] && ([:test] - args.keys).empty?
+      valid = args[:test] && (args.keys - [:test]).empty?
       valid &&= args[:test].is_a?(String)
       if valid
         set_properties(args)
@@ -86,7 +86,7 @@ module Plotrb
     #TODO: see (#filter)
     def formula(args)
       valid = args[:field] && args[:expr] &&
-          ([:field, :expr] - args.keys).empty?
+          (args.keys - [:field, :expr]).empty?
       valid &&= args[:field].is_a?(String) && args[:expr].is_a?(String)
       if valid
         set_properties(args)
@@ -97,7 +97,7 @@ module Plotrb
 
     # @param args [Hash] properties for sort transform
     def sort(args)
-      valid = args[:by] && ([:by] - args.keys).empty?
+      valid = args[:by] && (args.keys - [:by]).empty?
       valid &&= args[:by].is_a?(String) || array_of_strings?(args[:by])
       if valid
         set_properties(args)
