@@ -3,6 +3,8 @@ require_relative '../../lib/plotrb/transforms'
 
 describe 'Transform' do
 
+  let(:transform) { ::Plotrb::Transform }
+
   describe 'setting properties for each type' do
 
     class FooClass < ::Plotrb::Transform
@@ -21,7 +23,6 @@ describe 'Transform' do
       end
     end
 
-    let(:transform) { ::Plotrb::Transform }
     let(:foo) { FooClass.new }
     let(:bar) { BarClass.new }
 
@@ -54,6 +55,23 @@ describe 'Transform' do
       transform.any_instance.stub(:valid_type?).and_return(true)
       transform.any_instance.should_receive(type).with(args)
       transform.new(type, args)
+    end
+
+    it 'raises error if property is unrecognized for the type of transform' do
+      type, args = :array, {:field => %w(foo bar), :baz => :qux}
+      expect { transform.new(type, args) }.
+          to raise_error ::Plotrb::InvalidInputError
+    end
+
+  end
+
+  describe 'setting copy transform' do
+
+    it 'raises error if "as" and "field" do not have same size' do
+      type = :array
+      args = {:from => :foo, :field => %w(foo, bar), :as => %W(qux)}
+      expect { transform.new(type, args) }.
+          to raise_error ::Plotrb::InvalidInputError
     end
 
   end
