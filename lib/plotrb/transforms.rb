@@ -1,3 +1,5 @@
+require_relative 'validators'
+
 module Plotrb
 
   # Data transform performs operations on a data set prior to
@@ -5,15 +7,20 @@ module Plotrb
   # See {https://github.com/trifacta/vega/wiki/Data-Transforms}
   class Transform
 
+    include ::Plotrb::Validators
+
     # all available types of transforms defined by Vega
     TYPES = [
         :array, :copy, :filter, :flatten, :formula, :sort, :stats, :unique,
         :zip, :force, :geo, :geopath, :link, :pie, :stack, :treemap, :wordcloud
     ]
 
+    attr_reader :type
+
     # @param type [Symbol, String] type of the transform
+    # @param args [Hash, nil] properties of the transform
     def initialize(type, args={})
-      if valid_type?(type) && args.is_a?(Hash)
+      if valid_type?(type)
         @type = type.to_sym
         self.send(@type, args)
       else
@@ -21,275 +28,195 @@ module Plotrb
       end
     end
 
-    # @return [Symbol] type of the transform
-    def type
-      @type
-    end
-
     # Data Manipulation Transforms
 
-    # @param args [Hash] properties for array transform
-    def array(args)
-      valid = args[:fields] && (args.keys - [:fields]).empty?
-      valid &&= array_of_String?(args[:fields])
-      if valid
-        set_properties(args)
-      else
-        raise ::Plotrb::InvalidInputError
-      end
+    # @param fields [Array<String>] array of field references to copy
+    def array(fields:[])
+      set_properties(:fields => fields)
     end
 
-    # @param args [Hash] properties for copy transform
-    def copy(args)
-      valid = args[:from] && args[:fields] &&
-          (args.keys - [:from, :fields, :as]).empty?
-      valid &&= array_of_String?(args[:fields])
-      valid &&= args[:as].nil? || args[:as].size == args[:fields].size
-      if valid
-        set_properties(args)
-      else
+    # @param from [String] the name of the object to copy values from
+    # @param fields [Array<String>] the fields to copy
+    # @param as [Array<String>, nil] the field names to copy the values to
+    def copy(from:'', fields:[], as:nil)
+      # as must be identical in length to the fields parameter
+      if as && as.size != fields.size
         raise ::Plotrb::InvalidInputError
       end
+      set_properties(:from => from, :fields => fields, :as => as)
     end
 
-    # @param args [Hash] properties for facet transform
-    def facet(args)
-      valid = args[:keys] && (args.keys - [:keys, :sort]).empty?
-      valid &&= array_of_String?(args[:keys])
-      valid &&= args[:sort].nil? || args[:sort].is_a?(String) ||
-          array_of_String?(args[:sort])
-      if valid
-        set_properties(args)
-      else
-        raise ::Plotrb::InvalidInputError
-      end
+    # @param keys [Array<String>] the fields to use as keys
+    # @param sort [String, Array<String>, nil] sort criteria
+    def facet(keys:[], sort:nil)
+      set_properties(:keys => keys, :sort => sort)
     end
 
-    # @param args [Hash] properties for filter transform
+    # @param test [String] the expression for the filter predicate, which
+    #   includes the variable `d`, corresponding to the current data object
     #TODO: support javascript Math
-    def filter(args)
-      valid = args[:test] && (args.keys - [:test]).empty?
-      valid &&= args[:test].is_a?(String)
-      if valid
-        set_properties(args)
-      else
-        raise ::Plotrb::InvalidInputError
-      end
+    def filter(test:'')
+      set_properties(:test => test)
     end
 
-    # @param args [nil] properties for flatten transform
-    def flatten(args)
-      raise ::Plotrb::InvalidInputError unless args.nil?
+    # no parameter needed
+    def flatten
+
     end
 
-    # @param args [Hash] properties for formula transform
+    # @param field [String] the property name in which to store the value
+    # @param expr [String] the expression for the formula
     #TODO: see (#filter)
-    def formula(args)
-      valid = args[:field] && args[:expr] &&
-          (args.keys - [:field, :expr]).empty?
-      valid &&= args[:field].is_a?(String) && args[:expr].is_a?(String)
-      if valid
-        set_properties(args)
-      else
-        raise ::Plotrb::InvalidInputError
-      end
+    def formula(field:'', expr:'')
+      set_properties(:field => field, :expr => expr)
     end
 
-    # @param args [Hash] properties for sort transform
-    def sort(args)
-      valid = args[:by] && (args.keys - [:by]).empty?
-      valid &&= args[:by].is_a?(String) || array_of_String?(args[:by])
-      if valid
-        set_properties(args)
-      else
-        raise ::Plotrb::InvalidInputError
-      end
+    # @param by [String, Array<String>] a list of fields to use as sort criteria
+    def sort(by:[])
+      set_properties(:by => by)
     end
 
-    # @param args [Hash] properties for stats transform
-    def stats(args)
-      valid = args[:value] && (args.keys - [:value, :median]).empty?
-      valid &&= args[:value].is_a?(String)
-      valid &&= args[:median].nil? || [true, false].include?([:median])
-      if valid
-        set_properties(args)
-      else
-        raise ::Plotrb::InvalidInputError
-      end
+    # @param value [String] the field for which to computer the statistics
+    # @param median [Boolean, nil] whether median will be computed
+    def stats(value:'', median:true)
+      set_properties(:value => value, :median => median)
     end
 
-    # @param args [Hash] properties for unique transform
-    def unique(args)
-      valid = args[:field] && args[:as] && (args.keys - [:field, :as]).empty?
-      valid &&= args[:field].is_a?(String) && args[:as].is_a?(String)
-      if valid
-        set_properties(args)
-      else
-        raise ::Plotrb::InvalidInputError
-      end
+    # @param field [String] the data field for which to compute unique value
+    # @param as [String] the field name to store the unique values
+    def unique(field:'', as:'')
+      set_properties(:field => field, :as => as)
     end
 
-    # @param args [Hash] properties for zip transform
-    def zip(args)
-      valid = args[:key] && args[:with] && args[:as] && args[:withKey] &&
-          (args.keys - [:key, :with, :as, :withKey, :default]).empty?
-      valid &&= args[:key].is_a?(String) && args[:with].is_a?(String) &&
-          args[:as].is_a?(String) && args[:withKey].is_a?(String)
-      if valid
-        set_properties(args)
-      else
-        raise ::Plotrb::InvalidInputError
-      end
+    # @param with [String] the name of the secondary data set to zip with the
+    #   primary data set
+    # @param as [String] the name of the field to store the secondary data set
+    #   values
+    # @param key [String] the field in the primary data set to match against the
+    #   the secondary data set
+    # @param with_key [String] the field in the secondary data set to match
+    #   against the primary data set
+    # @param default [] a default value to use if no matching key value is found
+    def zip(with:'', as:'', key:'', with_key:'', default:nil)
+      set_properties(:with => with, :as => as, :key => key,
+                     :withKey => with_key, :default => default)
     end
 
     # Visual Encoding Transforms
 
-    # @param args [Hash] properties for force transform
-    def force(args)
-      valid = args[:links] && (args.keys - [:links, :size, :iterations, :charge,
-                                            :linkDistance, :linkStrength,
-                                            :friction, :theta, :gravity,
-                                            :alpha]).empty?
-      valid &&= args[:links].is_a?(String)
-      valid &&= args[:size].nil? || array_of_Numeric?(args[:size], size=2)
-      valid &&= args[:iterations].nil? || args[:iterations].is_a?(Integer)
-      valid &&= args[:charge].nil? || args[:charge].is_a?(Numeric) ||
-          args[:charge].is_a?(String)
-      valid &&= args[:linkDistance].nil? ||
-          args[:linkDistance].is_a?(Numeric) ||
-          args[:linkDistance].is_a?(String)
-      valid &&= args[:linkStrength].nil? ||
-          args[:linkStrength].is_a?(Numeric) ||
-          args[:linkStrength].is_a?(String)
-      valid &&= args[:friction].nil? || args[:friction].is_a?(Numeric)
-      valid &&= args[:theta].nil? || args[:theta].is_a?(Numeric)
-      valid &&= args[:gravity].nil? || args[:gravity].is_a?(Numeric)
-      valid &&= args[:alpha].nil? || args[:alpha].is_a?(Numeric)
-      if valid
-        set_properties(args)
-      else
-        raise ::Plotrb::InvalidInputError
-      end
+    # @param links [String] the name of the link (edge) data set, must have
+    #   `source` and `target` attributes
+    # @param size [Array(Integer, Integer), nil] the dimensions of the layout
+    # @param iterations [Integer, nil] the number of iterations to run
+    # @param charge [Numeric, String, nil] the strength of the charge each node
+    #   exerts
+    # @param link_distance [Integer, String, nil] the length of edges
+    # @param link_strength [Numeric, String, nil] the tension of edges
+    # @param friction [Numeric, nil] the strength of the friction force used to
+    #   stabilize the layout
+    # @param theta [Numeric, nil] the theta parameter for the Barnes-Hut
+    #   algorithm used to compute charge forces between nodes
+    # @param gravity [Numeric, nil] the strength of the pseudo-gravity force
+    #   that pulls nodes towards the center of the layout area
+    # @param alpha [Numeric, nil] a "temperature" parameter that determines how
+    #   much node positions are adjusted at each step
+    def force(links:'', size:nil, iterations:nil, charge:nil, link_distance:nil,
+        link_strength:nil, friction:nil, theta:nil, gravity:nil, alpha:nil)
+      set_properties(:links => links, :size => size, :iterations => iterations,
+                     :charge => charge, :linkDistance => link_distance,
+                     :linkStrength => link_strength, :friction => friction,
+                     :theta => theta, :gravity => gravity, :alpha => alpha)
     end
 
-    # @param args [Hash] properties for geo transform
-    def geo(args)
-      valid = args[:lon] && args[:lat] &&
-          (args.keys - [:projection, :lon, :lat, :center, :translate, :scale,
-                        :rotate, :precision, :clipAngle]).empty?
-      valid &&= args[:lon].is_a?(String) && args[:lat].is_a?(String)
-      valid &&= args[:projection].nil? || valid_projection?(args[:projection])
-      valid &&= args[:center].nil? || array_of_Numeric?(args[:center], size=2)
-      valid &&= args[:translate].nil? ||
-          array_of_Numeric?(args[:translate], size=2)
-      valid &&= args[:scale].nil? || args[:scale].is_a?(Numeric)
-      valid &&= args[:rotate].nil? || args[:rotate].is_a?(Numeric)
-      valid &&= args[:precision].nil? || args[:precision].is_a?(Numeric)
-      valid &&= args[:clipAngle].nil? || args[:clipAngle].is_a?(Numeric)
-      if valid
-        set_properties(args)
-      else
-        raise ::Plotrb::InvalidInputError
-      end
+    # @param projection [String, nil] the type of cartographic projection to use
+    # @param lon [String] the input longitude values
+    # @param lat [String] the input latitude values
+    # @param center [Array(Integer, Integer), nil] the center of the projection
+    # @param translate [Array(Integer, Integer), nil] the translation of the
+    #   projection
+    # @param scale [Numeric, nil] the scale of the projection
+    # @param rotate [Numeric, nil] the rotation of the projection
+    # @param precision [Numeric, nil] the desired precision of the projection
+    # @param clip_angle [Numeric, nil] the clip angle of the projection
+    def geo(projection:nil, lon:'', lat:'', center:nil, translate:nil,
+        scale:nil, rotate:nil, precision:nil, clip_angle:nil)
+      set_properties(:projection => projection, :lon => lon, :lat => lat,
+                     :center => center, :translate => translate,
+                     :scale => scale, :rotate => rotate,
+                     :precision => precision, :clipAngle => clip_angle)
     end
 
-    # @param args [Hash] properties for geopath transform
-    def geopath(args)
-      valid = args[:field] && (args.keys - [:projection, :field, :center,
-                                            :translate, :scale, :rotate,
-                                            :precision, :clipAngle]).empty?
-      valid &&= args[:field].is_a?(String)
-      valid &&= args[:projection].nil? || valid_projection?(args[:projection])
-      valid &&= args[:center].nil? || array_of_Numeric?(args[:center], size=2)
-      valid &&= args[:translate].nil? ||
-          array_of_Numeric?(args[:translate], size=2)
-      valid &&= args[:scale].nil? || args[:scale].is_a?(Numeric)
-      valid &&= args[:rotate].nil? || args[:rotate].is_a?(Numeric)
-      valid &&= args[:precision].nil? || args[:precision].is_a?(Numeric)
-      valid &&= args[:clipAngle].nil? || args[:clipAngle].is_a?(Numeric)
-      if valid
-        set_properties(args)
-      else
-        raise ::Plotrb::InvalidInputError
-      end
+    # @param field [String] the data field containing the GeoJSON feature data
+    # @param (see #geo)
+    def geopath(field:'', projection:nil, center:nil, translate:nil, scale:nil,
+        rotate:nil, precision:nil, clip_angle:nil)
+      set_properties(:field => field, :projection => projection,
+                     :center => center, :translate => translate,
+                     :scale => scale, :rotate => rotate,
+                     :precision => precision, :clipAngle => clip_angle)
     end
 
-    # @param args [Hash] properties for link transform
-    def link(args)
-      valid = (args.keys - [:source, :target, :shape, :tension]).empty?
-      valid &&= args[:shape].nil? || valid_shape?(args[:shape])
-      valid &&= args[:source].nil? || args[:source].is_a?(String)
-      valid &&= args[:target].nil? || args[:target].is_a?(String)
-      valid &&= args[:tension].nil? || valid_tension?(args[:tension])
-      if valid
-        set_properties(args)
-      else
-        raise ::Plotrb::InvalidInputError
-      end
+    # @param source [String, nil] the data field that references the source
+    #   node for this link
+    # @param target [String, nil] the data field that references the target
+    #   node for this link
+    # @param shape [Symbol, nil] the path shape to use
+    # @param tension [Numeric, nil] the tension in the range [0,1] for the
+    #   "tightness" of `curve`-shaped links
+    def link(source:nil, target:nil, shape:nil, tension:nil)
+      set_properties(:source => source, :target => target, :shape => shape,
+                     :tension => tension)
     end
 
-    # @param args [Hash] properties for pie transform
-    def pie(args)
-      valid = (args.keys - [:sort, :value]).empty?
-      valid &&= args[:sort].nil? || [true, false].include?(args[:sort])
-      valid &&= args[:value].nil? || args[:value].is_a?(String)
-      if valid
-        set_properties(args)
-      else
-        raise ::Plotrb::InvalidInputError
-      end
+    # @param sort [Boolean, nil] whether to sort the data prior to computing
+    #   angles
+    # @param value [String, nil] the data values to encode as angular spans
+    def pie(sort:true, value:nil)
+      set_properties(:sort => sort, :value => value)
     end
 
-    # @param args [Hash] properties for stack transform
-    def stack(args)
-      valid = args[:point] && args[:height]
-          (args.keys - [:point, :height, :offset, :order]).empty?
-      valid &&= args[:point].is_a?(String) && args[:height].is_a?(String)
-      valid &&= args[:offset].nil? || valid_offset?(args[:offset])
-      valid &&= args[:order].nil? || valid_order?(args[:order])
-      if valid
-        set_properties(args)
-      else
-        raise ::Plotrb::InvalidInputError
-      end
+    # @param point [String] the data field determining the points at which to
+    #   stack
+    # @param height [String] the data field determining the height of a stack
+    # @param offset [Symbol, nil] the baseline offset style
+    # @param order [Symbol, nil] the sort order for stack layers
+    def stack(point:'', height:'', offset:nil, order:nil)
+      set_properties(:point => point, :height => height, :offset => offset,
+                     :order => order)
     end
 
-    # @param args [Hash] properties for treemap transform
-    def treemap(args)
-      valid = args[:value] && (args.keys - [:padding, :ration, :round, :size,
-                                            :sticky, :value]).empty?
-      valid &&= args[:value].is_a?(String)
-      valid &&= args[:padding].nil? || args[:padding].is_a?(Numeric) ||
-          array_of_Numeric?(args[:padding], size=4)
-      valid &&= args[:ratio].nil? || args[:ratio].is_a?(Numeric)
-      valid &&= args[:round].nil? || [true, false].include?(args[:round])
-      valid &&= args[:size].nil? || array_of_Numeric?(args[:size], size=2)
-      valid &&= args[:sticky].nil? || [true, false].include?(args[:sticky])
-      if valid
-        set_properties(args)
-      else
-        raise ::Plotrb::InvalidInputError
-      end
+    # @param padding [Integer, Array(Integer, Integer, Integer, Integer), nil]
+    #   the padding to provide around the internal nodes in the treemap
+    # @param ratio [Numeric, nil] the target aspect ratio for the layout to
+    #   optimize
+    # @param round [Boolean, nil] whether cell dimensions will be rounded to
+    #   integer pixels
+    # @param size [Array(Integer, Integer), nil] the dimensions of the layout
+    # @param sticky [Boolean, nil] whether repeated runs of the treemap will
+    #   use cached partition boundaries
+    # @param value [String] the values to use to determine the area of each
+    #   leaf-level treemap cell
+    def treemap(padding:nil, ratio:nil, round:true, size:nil, sticky:true,
+        value:'')
+      set_properties(:padding => padding, :ratio => ratio, :round => round,
+                     :size => size, :sticky => sticky, :value => value)
     end
 
-    # @param args [Hash] properties for wordcloud transform
-    def wordcloud(args)
-      valid = args[:text] && args[:font] && args[:fontSize] &&
-          (args.keys - [:font, :fontSize, :fontStyle, :fontWeight, :padding,
-                        :rotate, :size, :text]).empty?
-      valid &&= args[:text].is_a?(String) && args[:fontSize].is_a?(String) &&
-          args[:font].is_a?(String)
-      valid &&= args[:fontStyle].nil? || args[:fontStyle].is_a?(String)
-      valid &&= args[:fontWeight].nil? || args[:fontWeight].is_a?(String)
-      valid &&= args[:padding].nil? || args[:padding].is_a?(Numeric) ||
-          array_of_Numeric?(args[:padding], size=4)
-      valid &&= args[:size].nil? || array_of_Numeric?(args[:size], size=2)
-      valid &&= args[:rotate].nil? || valid_wordcloud_rotate?(args[:rotate])
-      if valid
-        set_properties(args)
-      else
-        raise ::Plotrb::InvalidInputError
-      end
+    # @param font [String] the font face to use within the word cloud
+    # @param font_size [String] the font size for a word
+    # @param font_style [String, nil] the font style to use
+    # @param font_weight [String, nil] the font weight to use
+    # @param padding [Integer, Array(Integer, Integer, Integer, Integer), nil]
+    #   the padding to provide around text in the word cloud
+    # @param rotate [String, Hash, nil] the rotation angle for a word
+    # @param size [Array(Integer, Integer), nil] the dimensions of the layout
+    # @param text [String] the data field containing the text to visualize
+    def wordcloud(font:'', font_size:'', font_style:nil, font_weight:nil,
+        padding:nil, rotate:nil, size:nil, text:'')
+      set_properties(:font => font, :fontSize => font_size,
+                     :fontStyle => font_style, :fontWeight => font_weight,
+                     :padding => padding, :rotate => rotate, :size => size,
+                     :text => text)
     end
 
     # override attr_accessor to keep track of properties set as attr_accessors
@@ -313,55 +240,6 @@ module Plotrb
           attr_accessor k
         end
         self.instance_variable_set("@#{k}", v)
-      end
-    end
-
-  private
-
-    def valid_type?(type)
-      TYPES.include?(type) || TYPES.include?(type.to_sym)
-    end
-
-    # TODO: validate D3 projections
-    def valid_projection?(projection)
-      projection.is_a?(String)
-    end
-
-    def valid_shape?(shape)
-      [:line, :curve, :diagonal, :diagonalX, :diagonalY].include?(shape.to_sym)
-    end
-
-    def valid_tension?(tension)
-      tension.is_a?(Numeric) && tension >=0 && tension <=1
-    end
-
-    def valid_offset?(offset)
-      [:zero, :silhouette, :wiggle, :expand].include?(offset.to_sym)
-    end
-
-    def valid_order?(order)
-      [:default, :reverse, :'inside-out'].include?(order.to_sym)
-    end
-
-    def valid_wordcloud_rotate?(rotate)
-      if rotate.is_a?(String)
-        true
-      elsif rotate.is_a?(Hash)
-        (rotate.keys - [:random, :alternate]).empty? && rotate.size == 1 &&
-            array_of_Numeric?(rotate.values[0])
-      end
-    end
-
-    def array_of_type?(type, arr, size=nil)
-      arr.is_a?(Array) && arr.all? { |a| a.is_a?(type)} &&
-          (size.nil? || arr.size == size)
-    end
-
-    def method_missing(method, *args, &block)
-      if method.to_s =~ /^array_of_(.+)\?$/
-        array_of_type?(Object.const_get($1), *args, &block)
-      else
-        super
       end
     end
 
