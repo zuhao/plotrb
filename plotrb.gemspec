@@ -23,4 +23,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'yard'
   spec.add_dependency 'yajl-ruby'
   spec.add_dependency 'hashie'
+  spec.add_dependency 'activemodel'
 end
