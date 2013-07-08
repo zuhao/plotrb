@@ -7,6 +7,8 @@ module Plotrb
   # See {https://github.com/trifacta/vega/wiki/Data}
   class Data
 
+    attr_accessor :name, :format, :values, :source, :url, :transform
+
     def initialize(args={})
       @name       = args[:name]
       @format     = args[:format]
@@ -16,22 +18,12 @@ module Plotrb
       @transform  = args[:transform]
     end
 
-    # @return [String] unique name of the data set
-    def name
-      @name
-    end
-
     # @param name [#to_s] unique name of the data set
     def name=(name)
       @name = name.to_s
       if @name.nil? || @name.empty?
         raise ::Plotrb::InvalidInputError
       end
-    end
-
-    # @return [Hash, nil] the format for the data file
-    def format
-      @format
     end
 
     # @param format [Hash] the format for the data file
@@ -45,21 +37,11 @@ module Plotrb
       end
     end
 
-    # @return [Hash, nil] the actual data set
-    def values
-      @values
-    end
-
     # @param values [Hash] the actual data set
     def values=(values)
       @values = Yajl::Parser.parse(values)
     rescue Yajl::ParseError
       raise ::Plotrb::InvalidInputError
-    end
-
-    # @return [String, nil] the name of another data set to us as source
-    def source
-      @source
     end
 
     # @param source [String] the name of another data set to us as source
@@ -71,11 +53,6 @@ module Plotrb
       end
     end
 
-    # @return [String, nil] the url from which to load the data set
-    def url
-      @url
-    end
-
     # @param url [String] the url from which to load the data set
     def url=(url)
       u = URI.parse(url)
@@ -84,11 +61,6 @@ module Plotrb
       end
     rescue URI::InvalidURIError
       raise ::Plotrb::InvalidInputError
-    end
-
-    # @return [Array<Transform>, nil] an array of transform definitions
-    def transform
-      @transform
     end
 
     # @param transform [Array<Transform>] an array of transform definitions

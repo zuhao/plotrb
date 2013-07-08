@@ -4,6 +4,11 @@ module Plotrb
   # See {https://github.com/trifacta/vega/wiki/Visualization}
   class Visualization
 
+    include ::Plotrb::Validators
+
+    attr_accessor :name, :width, :height, :viewport, :padding, :data, :scales,
+                  :marks
+
     def initialize(args={})
       @name     = args[:name]
       @width    = args[:width] || 500
@@ -12,22 +17,10 @@ module Plotrb
       @padding  = args[:padding] || 5
     end
 
-    # @return [String] unique name of the visualization
-    def name
-      @name
-    end
-
     # @param name [String] unique name of the visualization
     def name=(name)
       @name = name.to_s
-      if @name.nil? || @name.empty?
-        raise ::Plotrb::InvalidInputError
-      end
-    end
-
-    # @return [Integer] the total width of the data rectangle
-    def width
-      @width
+      raise ::Plotrb::InvalidInputError if @name.empty?
     end
 
     # @param width [Integer] the total width of the data rectangle
@@ -39,11 +32,6 @@ module Plotrb
       end
     end
 
-    # @return [Integer] the total height of the data rectangle
-    def height
-      @height
-    end
-
     # @param height [Integer] the total height of the data rectangle
     def height=(height)
       if height.respond_to?(:to_i)
@@ -51,12 +39,6 @@ module Plotrb
       else
         raise ::Plotrb::InvalidInputError
       end
-    end
-
-    # @return [Array(Integer, Integer)] the width and height of the on-screen
-    #   viewport
-    def viewport
-      @viewport
     end
 
     # @param viewport [Array(Integer, Integer), nil] the width and height of the
@@ -78,12 +60,6 @@ module Plotrb
       raise ::Plotrb::InvalidInputError
     end
 
-    # @return [Integer, Hash] the internal padding from the visualization edge
-    #   to the data rectangle
-    def padding
-      @padding
-    end
-
     # @param padding [Integer, Hash] the internal padding from the visualization
     #   edge to the data rectangle
     def padding=(padding)
@@ -95,6 +71,33 @@ module Plotrb
           @padding[pos] = padding[pos]
         end
         raise ::Plotrb::InvalidInputError if @padding[pos].nil?
+      end
+    end
+
+    # @param data [Array<Data>] the data for visualization
+    def data=(data)
+      if array_of_Data?(data)
+        @data = data
+      else
+        raise ::Plotrb::InvalidInputError
+      end
+    end
+
+    # @param scales [Array<Scales>] the scales for visualization
+    def scales=(scales)
+      if array_of_Scale?(scales)
+        @scales = scales
+      else
+        raise ::Plotrb::InvalidInputError
+      end
+    end
+
+    # @param marks [Array<Marks>] the marks for visualization
+    def marks=(marks)
+      if array_of_Mark?(marks)
+        @marks = marks
+      else
+        raise ::Plotrb::InvalidInputError
       end
     end
 
