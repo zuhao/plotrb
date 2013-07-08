@@ -19,8 +19,7 @@ module Plotrb
       end
 
       def valid_keys?(prop)
-        (prop.keys - [:ticks, :major_ticks, :minor_ticks, :labels, :axis]).
-            empty?
+        (prop.keys - %i(ticks major_ticks minor_ticks labels axis)).empty?
       rescue NoMethodError
         false
       end
