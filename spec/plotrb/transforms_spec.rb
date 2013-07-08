@@ -67,9 +67,9 @@ describe 'Transform' do
 
   describe 'setting copy transform' do
 
-    it 'raises error if "as" and "field" do not have same size' do
-      type = :array
-      args = {:from => :foo, :field => %w(foo, bar), :as => %W(qux)}
+    it 'raises error if "as" and "fields" do not have same size' do
+      type = :copy
+      args = {:from => :foo, :fields => %w(foo, bar), :as => %W(qux)}
       expect { transform.new(type, args) }.
           to raise_error ::Plotrb::InvalidInputError
     end
