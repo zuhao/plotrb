@@ -10,10 +10,8 @@ module Plotrb
     include ::Plotrb::Validators
 
     # all available types of transforms defined by Vega
-    TYPES = [
-        :array, :copy, :filter, :flatten, :formula, :sort, :stats, :unique,
-        :zip, :force, :geo, :geopath, :link, :pie, :stack, :treemap, :wordcloud
-    ]
+    TYPES = %i(array copy filter flatten formula sort stats unique zip force geo
+               geopath link pie stack treemap wordcloud)
 
     attr_reader :type
 
