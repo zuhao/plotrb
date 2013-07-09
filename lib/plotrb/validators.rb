@@ -2,6 +2,8 @@ module Plotrb
 
   module Validators
 
+    extend self
+
     def valid_type?(type)
       ::Plotrb::Transform::TYPES.include?(type) ||
           ::Plotrb::Transform::TYPES.include?(type.to_sym)

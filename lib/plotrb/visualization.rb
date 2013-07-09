@@ -5,6 +5,7 @@ module Plotrb
   class Visualization
 
     include ::Plotrb::Validators
+    include ActiveModel::Validations
 
     attr_accessor :name, :width, :height, :viewport, :padding, :data, :scales,
                   :marks
@@ -17,91 +18,52 @@ module Plotrb
       @padding  = args[:padding] || 5
     end
 
-    # @param name [String] unique name of the visualization
-    def name=(name)
-      @name = name.to_s
-      raise ::Plotrb::InvalidInputError if @name.empty?
-    end
-
-    # @param width [Integer] the total width of the data rectangle
-    def width=(width)
-      if width.respond_to?(:to_i)
-        @width = width.to_i
-      else
-        raise ::Plotrb::InvalidInputError
+    class ViewportValidator < ActiveModel::EachValidator
+      def validate_each(record, attribute, value)
+        record.errors.add(attribute, 'invalid viewport') unless
+            ::Plotrb::Validators::array_of_Integer?(value, 2)
       end
     end
 
-    # @param height [Integer] the total height of the data rectangle
-    def height=(height)
-      if height.respond_to?(:to_i)
-        @height = height.to_i
-      else
-        raise ::Plotrb::InvalidInputError
+    class PaddingValidator < ActiveModel::EachValidator
+      def validate_each(record, attribute, value)
+        record.errors.add(attribute, 'invalid padding') unless
+            value.is_a?(Integer) || value.keys.sort == %i(down left right top)
       end
     end
 
-    # @param viewport [Array(Integer, Integer), nil] the width and height of the
-    #   on-screen viewport
-    def viewport=(viewport)
-      if viewport
-        if viewport.is_a?(Array)
-          @viewport = [viewport[0].to_i, viewport[1].to_i]
-        elsif viewport.is_a?(Hash)
-          @viewport = [viewport[:width], viewport[:height]]
-        end
-      else
-        @viewport = [width, height]
-      end
-      if @viewport.nil? || @viewport.include?(nil)
-        raise ::Plotrb::InvalidInputError
-      end
-    rescue NoMethodError
-      raise ::Plotrb::InvalidInputError
-    end
-
-    # @param padding [Integer, Hash] the internal padding from the visualization
-    #   edge to the data rectangle
-    def padding=(padding)
-      @padding = {}
-      [:top, :left, :right, :bottom].each do |pos|
-        if padding.respond_to?(:to_i)
-          @padding[pos] = padding.to_i
-        elsif padding.respond_to?(:[])
-          @padding[pos] = padding[pos]
-        end
-        raise ::Plotrb::InvalidInputError if @padding[pos].nil?
+    class DataValidator < ActiveModel::EachValidator
+      def validate_each(record, attribute, value)
+        record.errors.add(attribute, 'invalid data') unless
+            ::Plotrb::Validators::array_of_Data?(value)
       end
     end
 
-    # @param data [Array<Data>] the data for visualization
-    def data=(data)
-      if array_of_Data?(data)
-        @data = data
-      else
-        raise ::Plotrb::InvalidInputError
+    class ScalesValidator < ActiveModel::EachValidator
+      def validate_each(record, attribute, value)
+        record.errors.add(attribute, 'invalid scales') unless
+            ::Plotrb::Validators::array_of_Scale?(value)
       end
     end
 
-    # @param scales [Array<Scales>] the scales for visualization
-    def scales=(scales)
-      if array_of_Scale?(scales)
-        @scales = scales
-      else
-        raise ::Plotrb::InvalidInputError
+    class MarksValidator < ActiveModel::EachValidator
+      def validate_each(record, attribute, value)
+        record.errors.add(attribute, 'invalid marks') unless
+            ::Plotrb::Validators::array_of_Mark?(value)
       end
     end
 
-    # @param marks [Array<Marks>] the marks for visualization
-    def marks=(marks)
-      if array_of_Mark?(marks)
-        @marks = marks
-      else
-        raise ::Plotrb::InvalidInputError
-      end
-    end
+    validates :name, presence: true, length: { minimum: 1 }
+    validates :width, presence: true,
+              numericality: { only_integer: true, greater_than: 0 }
+    validates :height, presence: true,
+              numericality: { only_integer: true, greater_than: 0 }
+    validates :viewport, presence: true, viewport: true
+    validates :padding, presence: true, padding: true
+    validates :data, presence: true, length: { minimum: 1 }, data: true
+    validates :scales, presence: true, length: { minimum: 1 }, scales: true
+    validates :marks, presence: true, length: { minimum: 1 }, marks: true
 
   end
-
 
 end
