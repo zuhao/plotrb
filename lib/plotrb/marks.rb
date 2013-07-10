@@ -4,6 +4,7 @@ module Plotrb
   # See {https://github.com/trifacta/vega/wiki/Marks}
   class Mark
 
+    include ::Plotrb::Internals
     include ActiveModel::Validations
 
     TYPES = %i(rect symbol path arc area line image text)
@@ -40,20 +41,7 @@ module Plotrb
 
     validates :type, presence: true, inclusion: { in: TYPES }
     validates :from, presence: true, from: true
-    #validates :properties, allow_nil: true
     validates :ease, allow_nil: true, ease: true
-
-    # A value reference specifies the value for a given mark property
-    class ValueRef
-
-      include ActiveModel::Validations
-
-      attr_accessor :value, :field, :scale, :mult, :offset, :band
-
-      validates :mult, allow_nil: true, numericality: true
-      validates :offset, allow_nil: true, numericality: true
-
-    end
 
     # Mark property sets
     attr_accessor :x, :x2, :width, :y, :y2, :height, :opacity, :fill,
@@ -69,6 +57,19 @@ module Plotrb
             value.is_a?(::Plotrb::Mark::ValueRef) && value.valid?
       end
     end
+
   end
 
+  # A value reference specifies the value for a given mark property
+  class ValueRef
+
+    include ::Plotrb::Internals
+    include ActiveModel::Validations
+
+    attr_accessor :value, :field, :scale, :mult, :offset, :band
+
+    validates :mult, allow_nil: true, numericality: true
+    validates :offset, allow_nil: true, numericality: true
+
+  end
 end

@@ -5,6 +5,7 @@ module Plotrb
   class Visualization
 
     include ::Plotrb::Validators
+    include ::Plotrb::Internals
     include ActiveModel::Validations
 
     attr_accessor :name, :width, :height, :viewport, :padding, :data, :scales,
@@ -16,6 +17,10 @@ module Plotrb
       @height   = args[:height] || 500
       @viewport = args[:viewport] || [@width, @height]
       @padding  = args[:padding] || 5
+    end
+
+    def generate_spec
+      collect_attributes.to_json
     end
 
     class ViewportValidator < ActiveModel::EachValidator

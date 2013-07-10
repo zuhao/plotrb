@@ -46,7 +46,13 @@ module Plotrb
 
     def method_missing(method, *args, &block)
       if method.to_s =~ /^array_of_(.+)\?$/
-        array_of_type?(Object.const_get($1), *args, &block)
+        if %w(Visualization Transform Data Scale
+              Mark Axis ValueRef).include?($1)
+          klass = "::Plotrb::#{$1}"
+        else
+          klass = $1
+        end
+        array_of_type?(Object.const_get(klass), *args, &block)
       else
         super
       end

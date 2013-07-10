@@ -1,5 +1,3 @@
-require_relative 'validators'
-
 module Plotrb
 
   # Data transform performs operations on a data set prior to
@@ -7,6 +5,7 @@ module Plotrb
   # See {https://github.com/trifacta/vega/wiki/Data-Transforms}
   class Transform
 
+    include ::Plotrb::Internals
     include ::Plotrb::Validators
 
     # all available types of transforms defined by Vega

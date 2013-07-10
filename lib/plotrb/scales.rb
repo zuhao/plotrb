@@ -5,6 +5,7 @@ module Plotrb
   # See {https://github.com/trifacta/vega/wiki/Scales}
   class Scale
 
+    include ::Plotrb::Internals
     include ActiveModel::Validations
 
     attr_accessor :name, :type, :domain, :domain_min, :domain_max, :range,

@@ -1,12 +1,10 @@
-require 'yajl'
-require 'uri'
-
 module Plotrb
 
   # The basic tabular data model used by Vega.
   # See {https://github.com/trifacta/vega/wiki/Data}
   class Data
 
+    include ::Plotrb::Internals
     include ::Plotrb::Validators
     include ActiveModel::Validations
 

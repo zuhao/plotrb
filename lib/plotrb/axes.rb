@@ -5,8 +5,11 @@ module Plotrb
   # See {https://github.com/trifacta/vega/wiki/Axes}
   class Axis
 
+    include ::Plotrb::Internals
     include ActiveModel::Validations
 
+    # @!attribute [rw] type
+    #   @return [Symbol] type of the axis, either :x or :y
     attr_accessor :type, :scale, :orient, :format, :ticks, :values, :subdivide,
                   :tick_padding, :tick_size, :tick_size_major, :tick_size_minor,
                   :tick_size_end, :offset, :properties
