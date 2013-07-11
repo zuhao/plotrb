@@ -46,7 +46,7 @@ module Plotrb
     class TransformValidator < ActiveModel::EachValidator
       def validate_each(record, attribute, value)
         record.errors.add(attribute, 'invalid viewport') unless
-            ::Plotrb::Validators::array_of_Transform?(value)
+            ::Plotrb::Validators::array_of_transform?(value)
       end
     end
 

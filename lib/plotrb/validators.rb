@@ -35,27 +35,35 @@ module Plotrb
         true
       elsif rotate.is_a?(Hash)
         (rotate.keys - [:random, :alternate]).empty? && rotate.size == 1 &&
-            array_of_Numeric?(rotate.values[0])
+            array_of_numeric?(rotate.values[0])
       end
     end
 
     def array_of_type?(type, arr, size=nil)
-      arr.is_a?(Array) && arr.all? { |a| a.is_a?(type)} &&
+      klass = Object.const_get(type)
+      arr.is_a?(Array) && arr.all? { |a| a.is_a?(klass)} &&
           (size.nil? || arr.size == size)
+    rescue NameError
+      false
     end
 
     def method_missing(method, *args, &block)
       if method.to_s =~ /^array_of_(.+)\?$/
+        type = classify($1)
         if %w(Visualization Transform Data Scale
-              Mark Axis ValueRef).include?($1)
-          klass = "::Plotrb::#{$1}"
+              Mark Axis ValueRef).include?(type)
+          klass = "::Plotrb::#{type}"
         else
-          klass = $1
+          klass = type
         end
-        array_of_type?(Object.const_get(klass), *args, &block)
+        array_of_type?(klass, *args, &block)
       else
         super
       end
+    end
+
+    def classify(name)
+      name.to_s.split('_').collect(&:capitalize).join
     end
 
   end

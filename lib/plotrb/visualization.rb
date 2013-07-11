@@ -42,7 +42,7 @@ module Plotrb
     class ViewportValidator < ActiveModel::EachValidator
       def validate_each(record, attribute, value)
         record.errors.add(attribute, 'invalid viewport') unless
-            ::Plotrb::Validators::array_of_Integer?(value, 2)
+            ::Plotrb::Validators::array_of_integer?(value, 2)
       end
     end
 
@@ -56,21 +56,21 @@ module Plotrb
     class DataValidator < ActiveModel::EachValidator
       def validate_each(record, attribute, value)
         record.errors.add(attribute, 'invalid data') unless
-            ::Plotrb::Validators::array_of_Data?(value)
+            ::Plotrb::Validators::array_of_data?(value)
       end
     end
 
     class ScalesValidator < ActiveModel::EachValidator
       def validate_each(record, attribute, value)
         record.errors.add(attribute, 'invalid scales') unless
-            ::Plotrb::Validators::array_of_Scale?(value)
+            ::Plotrb::Validators::array_of_scale?(value)
       end
     end
 
     class MarksValidator < ActiveModel::EachValidator
       def validate_each(record, attribute, value)
         record.errors.add(attribute, 'invalid marks') unless
-            ::Plotrb::Validators::array_of_Mark?(value)
+            ::Plotrb::Validators::array_of_mark?(value)
       end
     end
 
