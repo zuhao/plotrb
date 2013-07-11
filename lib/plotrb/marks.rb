@@ -9,6 +9,22 @@ module Plotrb
 
     TYPES = %i(rect symbol path arc area line image text)
 
+    # @!attributes type
+    #   @return [Symbol] the mark type
+    # @!attributes name
+    #   @return [String] the name of the mark
+    # @!attributes description
+    #   @return [String] optional description of the mark
+    # @!attributes from
+    #   @return [Hash] the data this mark set should visualize
+    # @!attributes properties
+    #   @return [Hash] the property set definitions
+    # @!attributes key
+    #   @return [String] the data field to use an unique key for data binding
+    # @!attributes delay
+    #   @return [ValueRef] the transition delay for mark updates
+    # @!attributes ease
+    #   @return [String] the transition easing function for mark updates
     attr_accessor :type, :name, :description, :from, :properties, :key, :delay,
                   :ease
 
@@ -66,6 +82,19 @@ module Plotrb
     include ::Plotrb::Internals
     include ActiveModel::Validations
 
+    # @!attributes value
+    #   @return [] A constant value
+    # @!attributes field
+    #   @return [String] A field from which to pull a data value
+    # @!attributes scale
+    #   @return [String] the name of a scale transform to apply
+    # @!attributes mult
+    #   @return [Numeric] a multiplier for the value
+    # @!attributes offset
+    #   @return [Numeric] an additive offset to bias the final value
+    # @!attributes band
+    #   @return [Boolean] whether to use range band of the scale as the
+    #     retrieved value
     attr_accessor :value, :field, :scale, :mult, :offset, :band
 
     validates :mult, allow_nil: true, numericality: true

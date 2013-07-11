@@ -8,6 +8,22 @@ module Plotrb
     include ::Plotrb::Internals
     include ActiveModel::Validations
 
+    # @!attributes name
+    #   @return [String] the name of the visualization
+    # @!attributes width
+    #   @return [Integer] the total width of the data rectangle
+    # @!attributes height
+    #   @return [Integer] the total height of the data rectangle
+    # @!attributes viewport
+    #   @return [Array(Integer, Integer)] the width and height of the viewport
+    # @!attributes padding
+    #   @return [Integer, Hash] the internal padding from the visualization
+    # @!attributes data
+    #   @return [Array<Data>] the data for visualization
+    # @!attributes scales
+    #   @return [Array<Scales>] the scales for visualization
+    # @!attributes marks
+    #   @return [Array<Marks>] the marks for visualization
     attr_accessor :name, :width, :height, :viewport, :padding, :data, :scales,
                   :marks
 

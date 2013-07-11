@@ -8,6 +8,18 @@ module Plotrb
     include ::Plotrb::Validators
     include ActiveModel::Validations
 
+    # @!attributes name
+    #   @return [String] the name of the data set
+    # @!attributes format
+    #   @return [Hash] the format of the data file
+    # @!attributes values
+    #   @return [Hash] the actual data set
+    # @!attributes source
+    #   @return [String] the name of another data set to use as source
+    # @!attributes url
+    #   @return [String] the url from which to load the data set
+    # @!attributes transform
+    #   @return [Array<Transform>] an array of transform definitions
     attr_accessor :name, :format, :values, :source, :url, :transform
 
     def initialize(args={})
@@ -64,18 +76,6 @@ module Plotrb
     validates :url, allow_nil: true, url: true
     validates :transform, allow_nil: true, transform: true
     validates :format, allow_nil: true, format: true
-
-    # @param name [#to_s] unique name of the data set
-
-    # @param format [Hash] the format for the data file
-
-    # @param values [Hash] the actual data set
-
-    # @param source [String] the name of another data set to us as source
-
-    # @param url [String] the url from which to load the data set
-
-    # @param transform [Array<Transform>] an array of transform definitions
 
   end
 

@@ -8,8 +8,35 @@ module Plotrb
     include ::Plotrb::Internals
     include ActiveModel::Validations
 
-    # @!attribute [rw] type
+    # @!attribute type
     #   @return [Symbol] type of the axis, either :x or :y
+    # @!attribute scale
+    #   @return [String] the name of the scale backing the axis
+    # @!attribute orient
+    #   @return [Symbol] the orientation of the axis
+    # @!attribute format
+    #   @return [String] the formatting pattern for axis labels
+    # @!attribute ticks
+    #   @return [Integer] a desired number of ticks
+    # @!attribute values
+    #   @return [Array] explicitly set the visible axis tick values
+    # @!attribute subdivide
+    #   @return [Integer] the number of minor ticks between major ticks
+    # @!attribute tick_padding
+    #   @return [Integer] the padding between ticks and text labels
+    # @!attribute tick_size
+    #   @return [Integer] the size of major, minor, and end ticks
+    # @!attribute tick_size_major
+    #   @return [Integer] the size of major ticks
+    # @!attribute tick_size_minor
+    #   @return [Integer] the size of minor ticks
+    # @!attribute tick_size_end
+    #   @return [Integer] the size of end ticks
+    # @!attribute offset
+    #   @return [Integer] the offset by which to displace the axis from the edge
+    #     of the enclosing group or data rectangle
+    # @!attribute properties
+    #   @return [Hash] optional mark property definitions for custom styling
     attr_accessor :type, :scale, :orient, :format, :ticks, :values, :subdivide,
                   :tick_padding, :tick_size, :tick_size_major, :tick_size_minor,
                   :tick_size_end, :offset, :properties

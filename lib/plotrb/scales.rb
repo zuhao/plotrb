@@ -8,6 +8,45 @@ module Plotrb
     include ::Plotrb::Internals
     include ActiveModel::Validations
 
+    # @!attributes name
+    #   @return [String] the name of the scale
+    # @!attributes type
+    #   @return [Symbol] the type of the scale
+    # @!attributes domain
+    #   @return [Array(Numeric, Numeric), Array, String] the domain of the
+    #     scale, representing the set of data values
+    # @!attributes domain_min
+    #   @return [Numeric, String] the minimum value in the scale domain
+    # @!attributes domain_max
+    #   @return [Numeric, String] the maximum value in the scale domain
+    # @!attributes range
+    #   @return [Array(Numeric, Numeric), Array, String] the range of the
+    #     scale, representing the set of visual values
+    # @!attributes range_min
+    #   @return [Numeric, String] the minimum value in the scale range
+    # @!attributes range_max
+    #   @return [Numeric, String] the maximum value in the scale range
+    # @!attributes reverse
+    #   @return [Boolean] whether flips the scale range
+    # @!attributes round
+    #   @return [Boolean] whether rounds numeric output values to integers
+    # @!attributes points
+    #   @return [Boolean] whether distributes the ordinal values over a
+    #     quantitative range at uniformly spaced points or bands
+    # @!attributes clamp
+    #   @return [Boolean] whether clamps values that exceed the data domain
+    #     to either to minimum or maximum range value
+    # @!attributes nice
+    #   @return [Symbol, Boolean, nil] scale domain in a more human-friendly
+    #     value range
+    # @!attributes exponent
+    #   @return [Numeric] the exponent of the scale transformation
+    # @!attributes zero
+    #   @return [Boolean] whether zero baseline value is included
+    # @!attributes data
+    #   @return [String] the name of the data set containing domain values
+    # @!attributes field
+    #   @return [String, Array<String>] reference to the desired data fields
     attr_accessor :name, :type, :domain, :domain_min, :domain_max, :range,
                   :range_min, :range_max, :reverse, :round, :points, :clamp,
                   :nice, :exponent, :zero, :data, :field
@@ -22,49 +61,6 @@ module Plotrb
     validates :type, allow_nil: true,
               inclusion: { in: %i(linear ordinal time utc log pow sqrt quantile
                                   quantize threshold) }
-
-
-    # @param domain [Array(Numeric, Numeric), Array, String] the domain of the
-    #   scale, representing the set of data values
-
-    # @param domain_min [Numeric, String] the minimum value in the scale domain
-
-    # @param domain_max [Numeric, String] the maximum value in the scale domain
-
-    # @param range [Array(Numeric, Numeric), Array, String] the range of the
-    #   scale, representing the set of visual values
-
-    # @param range_min [Numeric, String] the minimum value in the scale range
-
-    # @param range_max [Numeric, String] the maximum value in the scale range
-
-    # @param reverse [Boolean] whether flips the scale range
-
-    # @param round [Boolean] whether rounds numeric output values to integers
-
-    # Ordinal Scale Properties
-
-    # @param points [Boolean] whether distributes the ordinal values over a
-    #   quantitative range at uniformly spaced points or bands
-
-    # Time Scale Properties
-
-    # @param clamp [Boolean] whether clamps values that exceed the data domain
-    #   to either to minimum or maximum range value
-
-    # @param nice [Symbol, Boolean, nil] scale domain ina more human-friendly value range
-
-    # Quantitative Scale Properties
-
-    # @param exponent [Numeric] the exponent of the scale transformation
-
-    # @param zero [Boolean] whether zero baseline value is included
-
-    # Scale Domains
-
-    # @param data [String] the name of the data set containing domain values
-
-    # @param field [String, Array<String>] reference to the desired data fields
 
   end
 
