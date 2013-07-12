@@ -23,12 +23,9 @@ module Plotrb
     attr_accessor :name, :format, :values, :source, :url, :transform
 
     def initialize(args={})
-      @name       = args[:name]
-      @format     = args[:format]
-      @values     = args[:values]
-      @source     = args[:source]
-      @url        = args[:url]
-      @transform  = args[:transform]
+      args.each do |k, v|
+        self.instance_variable_set("@#{k}", v) if self.attributes.include?(k)
+      end
     end
 
     class UrlValidator < ActiveModel::EachValidator

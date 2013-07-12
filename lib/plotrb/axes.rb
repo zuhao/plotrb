@@ -77,6 +77,12 @@ module Plotrb
               numericality: { only_integer: true, greater_than_or_equal_to: 0 }
     validates :properties, allow_nil: true, properties: true
 
+    def initialize(args={})
+      args.each do |k, v|
+        self.instance_variable_set("@#{k}", v) if self.attributes.include?(k)
+      end
+    end
+
   end
 
 end

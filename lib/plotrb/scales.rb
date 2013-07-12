@@ -62,6 +62,14 @@ module Plotrb
               inclusion: { in: %i(linear ordinal time utc log pow sqrt quantile
                                   quantize threshold) }
 
+    def initialize(args={})
+      args.each do |k, v|
+        self.instance_variable_set("@#{k}", v) if self.attributes.include?(k)
+      end
+    end
+
+  end
+
   end
 
 end

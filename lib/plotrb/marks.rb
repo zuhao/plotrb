@@ -26,7 +26,7 @@ module Plotrb
     # @!attributes ease
     #   @return [String] the transition easing function for mark updates
     attr_accessor :type, :name, :description, :from, :properties, :key, :delay,
-                  :ease
+                  :ease, :group
 
     class FromValidator < ActiveModel::EachValidator
       def validate_each(record, attribute, value)
@@ -74,6 +74,12 @@ module Plotrb
       end
     end
 
+    def initialize(args={})
+      args.each do |k, v|
+        self.instance_variable_set("@#{k}", v) if self.attributes.include?(k)
+      end
+    end
+
   end
 
   # A value reference specifies the value for a given mark property
@@ -83,7 +89,7 @@ module Plotrb
     include ActiveModel::Validations
 
     # @!attributes value
-    #   @return [] A constant value
+    #   @return A constant value
     # @!attributes field
     #   @return [String] A field from which to pull a data value
     # @!attributes scale
@@ -100,5 +106,12 @@ module Plotrb
     validates :mult, allow_nil: true, numericality: true
     validates :offset, allow_nil: true, numericality: true
 
+    def initialize(args={})
+      args.each do |k, v|
+        self.instance_variable_set("@#{k}", v) if self.attributes.include?(k)
+      end
+    end
+
   end
+
 end

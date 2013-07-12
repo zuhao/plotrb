@@ -17,6 +17,15 @@ module Plotrb
     #   @return [Symbol] the transform type
     attr_accessor :type
 
+    def initialize(args={})
+      unless args[:type].nil?
+        self.type=args[:type]
+        args.each do |k, v|
+          self.instance_variable_set("@#{k}", v) if self.attributes.include?(k)
+        end
+      end
+    end
+
     def type=(type)
       @type = type.to_sym
       self.send(@type) if TYPES.include?(@type)

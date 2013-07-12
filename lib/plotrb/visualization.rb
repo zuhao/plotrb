@@ -30,11 +30,10 @@ module Plotrb
                   :marks, :axes
 
     def initialize(args={})
-      @name     = args[:name]
-      @width    = args[:width] || 500
-      @height   = args[:height] || 500
-      @viewport = args[:viewport] || [@width, @height]
-      @padding  = args[:padding] || 5
+      default = {width: 500, height: 500}
+      args.reverse_merge(default).each do |k, v|
+        self.instance_variable_set("@#{k}", v) if self.attributes.include?(k)
+      end
     end
 
     def generate_spec(format=nil)
