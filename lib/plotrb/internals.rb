@@ -34,14 +34,21 @@ module Plotrb
       singleton_attr.concat(class_attr)
     end
 
+    # add and set new attributes and values to the instance
     # @param args [Hash] attributes in the form of a Hash
     def set_attributes(args)
       args.each do |k, v|
         # use singleton_class as attributes are instance-specific
-        self.singleton_class.class_eval do
-          attr_accessor k
-        end
-        self.instance_variable_set("@#{k}", v)
+        self.singleton_class.class_eval { attr_accessor k }
+        self.instance_variable_set("@#{k}", v) unless v.nil?
+      end
+    end
+
+    # add new attributes to the instance
+    # @param args [Array<Symbol>] the attributes to add to the instance
+    def add_attributes(*args)
+      args.each do |k|
+        self.singleton_class.class_eval { attr_accessor k }
       end
     end
 
@@ -50,8 +57,8 @@ module Plotrb
       attributes.reject { |attr| self.instance_variable_get("@#{attr}").nil? }
     end
 
-    # @return [Boolean] identify if a class includes Internals module, serve as
-    #   the end point of recursion
+    # @return [Boolean] identify if a class includes Internals module, used for
+    #   checking the end point of recursion
     def vega_spec?
       self.class.vega_spec?
     end
