@@ -68,16 +68,23 @@ module Plotrb
       collected = {}
       defined_attributes.each do |attr|
         value = self.instance_variable_get("@#{attr}")
+        # change snake_case attributes to camelCase used in Vega's JSON spec
+        json_attr = classify(attr, :json)
         if value.respond_to?(:vega_spec?) && value.vega_spec?
-          collected[attr] = value.collect_attributes
+          collected[json_attr] = value.collect_attributes
         elsif value.is_a?(Array)
-          collected[attr] = [].concat(value.collect{ |v|
+          collected[json_attr] = [].concat(value.collect{ |v|
             v.respond_to?(:collect_attributes) ? v.collect_attributes : v })
         else
-          collected[attr] = value
+          collected[json_attr] = value
         end
       end
       collected
+    end
+
+    def classify(name, format=nil)
+      name.to_s.split('_').collect(&:capitalize).join
+      name[0].downcase + name[1..-1] if format == :json
     end
 
   end
