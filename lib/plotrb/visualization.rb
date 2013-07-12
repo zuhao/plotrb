@@ -35,8 +35,12 @@ module Plotrb
       @padding  = args[:padding] || 5
     end
 
-    def generate_spec
-      collect_attributes.to_json
+    def generate_spec(format=nil)
+      if format == :pretty
+        JSON.pretty_generate(self.collect_attributes)
+      else
+        JSON.generate(self.collect_attributes)
+      end
     end
 
     class ViewportValidator < ActiveModel::EachValidator
