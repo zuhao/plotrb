@@ -24,8 +24,10 @@ module Plotrb
     #   @return [Array<Scales>] the scales for visualization
     # @!attributes marks
     #   @return [Array<Marks>] the marks for visualization
+    # @!attributes axes
+    #   @return [Array<Axis>] the axes for visualization
     attr_accessor :name, :width, :height, :viewport, :padding, :data, :scales,
-                  :marks
+                  :marks, :axes
 
     def initialize(args={})
       @name     = args[:name]
@@ -78,6 +80,13 @@ module Plotrb
       end
     end
 
+    class AxesValidator < ActiveModel::EachValidator
+      def validate_each(record, attribute, value)
+        record.errors.add(attribute, 'invalid axes') unless
+            ::Plotrb::Validators::array_of_axis?(value)
+      end
+    end
+
     validates :name, presence: true, length: { minimum: 1 }
     validates :width, presence: true,
               numericality: { only_integer: true, greater_than: 0 }
@@ -88,6 +97,7 @@ module Plotrb
     validates :data, presence: true, length: { minimum: 1 }, data: true
     validates :scales, presence: true, length: { minimum: 1 }, scales: true
     validates :marks, presence: true, length: { minimum: 1 }, marks: true
+    validates :axes, presence: true, length: { minimum: 1 }, axes: true
 
   end
 
