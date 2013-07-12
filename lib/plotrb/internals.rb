@@ -31,7 +31,7 @@ module Plotrb
     def attributes
       singleton_attr = self.singleton_class.attributes || []
       class_attr = self.class.attributes || []
-      singleton_attr.concat(class_attr)
+      singleton_attr.concat(class_attr).uniq
     end
 
     # add and set new attributes and values to the instance
@@ -70,7 +70,7 @@ module Plotrb
         value = self.instance_variable_get("@#{attr}")
         # change snake_case attributes to camelCase used in Vega's JSON spec
         json_attr = classify(attr, :json)
-        if value.respond_to?(:vega_spec?) && value.vega_spec?
+        if value.respond_to?(:collect_attributes)
           collected[json_attr] = value.collect_attributes
         elsif value.is_a?(Array)
           collected[json_attr] = [].concat(value.collect{ |v|
@@ -85,6 +85,27 @@ module Plotrb
     def classify(name, format=nil)
       name.to_s.split('_').collect(&:capitalize).join
       name[0].downcase + name[1..-1] if format == :json
+    end
+
+    # monkey patch Hash class to support reverse_merge
+    class ::Hash
+
+      def reverse_merge(other_hash)
+        other_hash.merge(self)
+      end
+
+      def collect_attributes
+        collected = {}
+        self.each do |k, v|
+          if v.respond_to?(:collect_attributes)
+            collected[k] = v.collect_attributes
+          else
+            collected[k] = v
+          end
+        end
+        collected
+      end
+
     end
 
   end
