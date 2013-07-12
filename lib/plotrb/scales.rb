@@ -70,6 +70,23 @@ module Plotrb
 
   end
 
+  # A data reference specifies the field for a given scale property
+  class DataRef
+
+    include ::Plotrb::Internals
+
+    # @!attributes data
+    #   @return [String] the name of a data set
+    # @!attributes field
+    #   @return [String] A field from which to pull a data values
+    attr_accessor :data, :field
+
+    def initialize(args={})
+      args.each do |k, v|
+        self.instance_variable_set("@#{k}", v) if self.attributes.include?(k)
+      end
+    end
+
   end
 
 end
