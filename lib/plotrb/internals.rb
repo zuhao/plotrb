@@ -73,8 +73,12 @@ module Plotrb
     end
 
     def classify(name, format=nil)
-      name.to_s.split('_').collect(&:capitalize).join
-      name[0].downcase + name[1..-1] if format == :json
+      klass = name.to_s.split('_').collect(&:capitalize).join
+      if format == :json
+        klass[0].downcase + klass[1..-1]
+      else
+        klass
+      end
     end
 
     # monkey patch Hash class to support reverse_merge
