@@ -20,10 +20,6 @@ module Plotrb
         @attributes
       end
 
-      def vega_spec?
-        true
-      end
-
     end
 
     # @return [Array<Symbol>] attributes of the particular instance combined
@@ -55,12 +51,6 @@ module Plotrb
     # @return [Array<Symbol>] attributes that have values
     def defined_attributes
       attributes.reject { |attr| self.instance_variable_get("@#{attr}").nil? }
-    end
-
-    # @return [Boolean] identify if a class includes Internals module, used for
-    #   checking the end point of recursion
-    def vega_spec?
-      self.class.vega_spec?
     end
 
     # @return [Hash] recursively construct a massive hash

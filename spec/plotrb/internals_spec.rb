@@ -40,7 +40,7 @@ describe 'Internals' do
       foo.respond_to?(:attributes).should be_true
     end
 
-    it 'keeps track of attributes as attr_accessors' do
+    it 'keeps track of attributes defined via attr_accessor' do
       foo.attributes.should match_array([:bar, :baz, :bar_bar])
     end
 
