@@ -36,6 +36,14 @@ module Plotrb
       end
     end
 
+    def method_missing(method, *args, &block)
+      if method.to_s =~ /(\w+)_scale$/
+        ::Plotrb::Scale.new(type: $1.to_sym)
+      else
+        super
+      end
+    end
+
     def generate_spec(format=nil)
       if format == :pretty
         JSON.pretty_generate(self.collect_attributes)

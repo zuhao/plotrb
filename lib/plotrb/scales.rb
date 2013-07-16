@@ -49,7 +49,7 @@ module Plotrb
     #   @return [String, Array<String>] reference to the desired data fields
     attr_accessor :name, :type, :domain, :domain_min, :domain_max, :range,
                   :range_min, :range_max, :reverse, :round, :points, :clamp,
-                  :nice, :exponent, :zero, :data, :field
+                  :nice, :exponent, :zero
 
     class DomainValidator < ActiveModel::EachValidator
       def validate_each(record, attribute, value)
@@ -65,6 +65,65 @@ module Plotrb
     def initialize(args={})
       args.each do |k, v|
         self.instance_variable_set("@#{k}", v) if self.attributes.include?(k)
+      end
+      self
+    end
+
+    def from(data, min=nil, max=nil)
+      @domain = data
+      @domain_min = min
+      @domain_max = max
+      self
+    end
+
+    def to(data, min=nil, max=nil)
+      @range = data
+      @range_min = min
+      @range_max = max
+      self
+    end
+
+    def reverse
+      @reverse = true
+      self
+    end
+
+    def round
+      @round = true
+      self
+    end
+
+    def points
+      @points = true
+      self
+    end
+
+    def bands
+      @points = false
+      self
+    end
+
+    def in_exponent(exp)
+      @exponent = exp
+      self
+    end
+
+    def nicely(val=nil)
+      if %i(time utc).include?(@type)
+        @nice = val
+      else
+        @nice = true
+      end
+      self
+    end
+
+    def method_missing(method, *args, &block)
+      if method.to_s =~ /(\w+)\?$/ && attributes.include?($1.to_sym)
+        self.instance_variable_get("@#{$1.to_sym}")
+      elsif method.to_s =~ /in_(\w+)s$/
+        self.nicely($1.to_sym)
+      else
+        super
       end
     end
 
