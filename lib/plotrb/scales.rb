@@ -51,6 +51,9 @@ module Plotrb
                   :range_min, :range_max, :reverse, :round, :points, :clamp,
                   :nice, :exponent, :zero
 
+    RANGE_LITERALS = %i(width height shapes colors more_colors)
+    TIME_SCALE_NICE = %i(second minute hour day week month year)
+
     class DomainValidator < ActiveModel::EachValidator
       def validate_each(record, attribute, value)
         record.errors.add(attribute, 'invalid domain')
@@ -70,7 +73,18 @@ module Plotrb
     end
 
     def from(data, min=nil, max=nil)
-      @domain = data
+      @domain =
+          case data
+            when String
+              source, field = data.split('.', 2)
+              if field.nil? || field == 'index'
+                ::Plotrb::DataRef.new(data: source, field: 'index')
+              else
+                ::Plotrb::DataRef.new(data: source, field: "data.#{field}")
+              end
+            else
+                data
+            end
       @domain_min = min
       @domain_max = max
       self
@@ -80,6 +94,21 @@ module Plotrb
       @range = data
       @range_min = min
       @range_max = max
+      self
+    end
+
+    def to_range_literal(literal)
+      @range =
+          case literal
+            when :colors
+              :category10
+            when :more_colors
+              :category20
+            when :width, :height, :shapes
+              literal
+            else
+              nil
+          end
       self
     end
 
@@ -110,20 +139,39 @@ module Plotrb
 
     def nicely(val=nil)
       if %i(time utc).include?(@type)
-        @nice = val
+        @nice = val if %i(second minute hour day week month year).include?(val)
       else
         @nice = true
       end
       self
     end
 
+    def include_zero
+      @zero = true
+      self
+    end
+
+    def clamp
+      @clamp = true
+      self
+    end
+
     def method_missing(method, *args, &block)
-      if method.to_s =~ /(\w+)\?$/ && attributes.include?($1.to_sym)
-        self.instance_variable_get("@#{$1.to_sym}")
-      elsif method.to_s =~ /in_(\w+)s$/
-        self.nicely($1.to_sym)
-      else
-        super
+      case method.to_s
+        when /(\w+)\?$/ # return value of the attribute, eg. type?
+          if attributes.include?($1.to_sym)
+            self.instance_variable_get("@#{$1.to_sym}")
+          end
+        when /in_(\w+)s$/ # set @nice for time and utc type, eg. in_seconds
+          if TIME_SCALE_NICE.include?($1.to_sym)
+            self.nicely($1.to_sym)
+          end
+        when /to_(\w+)$/ # set range literals, eg. to_more_colors
+          if RANGE_LITERALS.include?($1.to_sym)
+            self.to_range_literal($1.to_sym)
+          end
+        else
+          super
       end
     end
 
