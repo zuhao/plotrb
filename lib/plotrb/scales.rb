@@ -139,7 +139,7 @@ module Plotrb
 
     def nicely(val=nil)
       if %i(time utc).include?(@type)
-        @nice = val if %i(second minute hour day week month year).include?(val)
+        @nice = val
       else
         @nice = true
       end
@@ -161,14 +161,20 @@ module Plotrb
         when /(\w+)\?$/ # return value of the attribute, eg. type?
           if attributes.include?($1.to_sym)
             self.instance_variable_get("@#{$1.to_sym}")
+          else
+            super
           end
         when /in_(\w+)s$/ # set @nice for time and utc type, eg. in_seconds
           if TIME_SCALE_NICE.include?($1.to_sym)
             self.nicely($1.to_sym)
+          else
+            super
           end
         when /to_(\w+)$/ # set range literals, eg. to_more_colors
           if RANGE_LITERALS.include?($1.to_sym)
             self.to_range_literal($1.to_sym)
+          else
+            super
           end
         else
           super
