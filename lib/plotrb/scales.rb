@@ -122,12 +122,12 @@ module Plotrb
       self
     end
 
-    def points
+    def as_points
       @points = true
       self
     end
 
-    def bands
+    def as_bands
       @points = false
       self
     end
