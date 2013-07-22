@@ -37,8 +37,10 @@ module Plotrb
     end
 
     def method_missing(method, *args, &block)
-      if method.to_s =~ /(\w+)_scale$/
+      if method.to_s =~ /^(\w+)_scale$/
         ::Plotrb::Scale.new(type: $1.to_sym)
+      elsif method.to_s =~ /^(x|y)_axis$/
+        ::Plotrb::Axis.new(type: $1.to_sym)
       else
         super
       end

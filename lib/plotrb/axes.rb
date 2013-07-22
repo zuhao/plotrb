@@ -39,7 +39,8 @@ module Plotrb
     #   @return [Hash] optional mark property definitions for custom styling
     attr_accessor :type, :scale, :orient, :format, :ticks, :values, :subdivide,
                   :tick_padding, :tick_size, :tick_size_major, :tick_size_minor,
-                  :tick_size_end, :offset, :properties
+                  :tick_size_end, :offset, :properties, :title, :title_offset,
+                  :grid
 
     # TODO: validates properties object using standard Vega Value References
     class PropertiesValidator < ActiveModel::EachValidator
@@ -80,6 +81,96 @@ module Plotrb
     def initialize(args={})
       args.each do |k, v|
         self.instance_variable_set("@#{k}", v) if self.attributes.include?(k)
+      end
+    end
+
+    def from(scale)
+      @scale =
+          case scale
+            when ::Plotrb::Scale
+              @scale = scale.name
+            when String
+              @scale = scale
+            else
+              nil
+          end
+      self
+    end
+
+    def ticks(ticks)
+      @ticks = ticks.to_i
+      self
+    end
+
+    def subdivide_by(divide)
+      @subdivide = divide.to_i
+      self
+    end
+
+    def orient(*args)
+      case args.size
+        when 0
+          @orient
+        when 1
+          @orient = args.first.to_sym
+          self
+        else
+          nil
+      end
+    end
+
+    def title(title, offset=nil)
+      @title = title
+      @title_offset = offset if offset
+      self
+    end
+
+    def offset_title_by(offset)
+      @title_offset = offset
+      self
+    end
+
+    def format(format)
+      @format = format
+      self
+    end
+
+    def values(values)
+      @values = values
+      self
+    end
+
+    def layer(layer)
+      @layer = layer
+      self
+    end
+
+    def with_grid
+      @grid = true
+      self
+    end
+    alias_method :show_grid, :with_grid
+
+
+
+    def method_missing(method, *args, &block)
+      case method.to_s
+        when /^(\w+)\?$/ # return value of the attribute, eg. type?
+          if attributes.include?($1.to_sym)
+            self.instance_variable_get("@#{$1.to_sym}")
+          else
+            super
+          end
+        when /^in_(\d+)_ticks$/  # set number of ticks. eg. in_20_ticks
+          self.ticks($1.to_i)
+        when /^subdivide_by_(\d+)$/ # set subdivide of ticks
+          self.subdivide($1.to_i)
+        when /^at_(top|bottom|left|right)$/ # set orient of the axis
+          self.orient($1.to_sym)
+        when /^at_(front|back)$/ # set layer of the axis
+          self.layer($1.to_sym)
+        else
+          super
       end
     end
 
