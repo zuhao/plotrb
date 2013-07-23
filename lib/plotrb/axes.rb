@@ -6,7 +6,6 @@ module Plotrb
   class Axis
 
     include ::Plotrb::Internals
-    include ActiveModel::Validations
 
     # @!attribute type
     #   @return [Symbol] type of the axis, either :x or :y
@@ -93,6 +92,7 @@ module Plotrb
           raise ArgumentError
       end
     end
+    alias_method :at_orient, :orient
 
     def title(*args)
       case args.size
@@ -269,12 +269,6 @@ module Plotrb
 
     def method_missing(method, *args, &block)
       case method.to_s
-        when /^get_(\w+)$/ # return value of the attribute, eg. get_type
-          if attributes.include?($1.to_sym)
-            self.instance_variable_get("@#{$1.to_sym}")
-          else
-            super
-          end
         when /^in_(\d+)_ticks$/  # set number of ticks. eg. in_20_ticks
           self.ticks($1.to_i)
         when /^subdivide_by_(\d+)$/ # set subdivide of ticks
