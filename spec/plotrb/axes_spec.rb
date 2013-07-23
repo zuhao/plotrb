@@ -93,7 +93,7 @@ describe 'Axis' do
 
   it 'sets if gridlines should be shown' do
     subject.show_grid
-    subject.grid.should == true
+    subject.grid?.should be_true
   end
 
 end
