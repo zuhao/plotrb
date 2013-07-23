@@ -4,7 +4,13 @@ describe 'Axis' do
 
   subject { ::Plotrb::Axis.new(type: :x) }
 
-  describe '#from' do
+  describe '#type' do
+
+    it 'only allows x or y as scale type'
+
+  end
+
+  describe '#scale' do
 
     it 'sets the scale backing the axis by name' do
       subject.from('foo_scale')
@@ -43,12 +49,18 @@ describe 'Axis' do
 
   end
 
-  describe '#offset_title_by' do
+  describe '#title_offset' do
 
     it 'sets offset of the title' do
       subject.offset_title_by(5)
       subject.title_offset.should == 5
     end
+
+  end
+
+  describe 'format' do
+
+    it 'checks if the format specification is valid'
 
   end
 
@@ -61,39 +73,99 @@ describe 'Axis' do
 
   end
 
-  it 'sets subdivide of the ticks' do
-    subject.subdivide_by(10)
-    subject.subdivide.should == 10
+  describe '#values' do
+
+    it 'sets values if given as an array' do
+      subject.values([1,2,3,4])
+      subject.values.should match_array([1,2,3,4])
+    end
+
+    it 'sets values if given one by one as arguments' do
+      subject.values(1,2,3,4)
+      subject.values.should match_array([1,2,3,4])
+    end
+
   end
 
-  it 'sets major tick size' do
-    subject.major_tick_size(10)
-    subject.tick_size_major.should == 10
+  describe '#subdivide' do
+
+    it 'sets subdivide of the ticks' do
+      subject.subdivide_by(10)
+      subject.subdivide.should == 10
+    end
+
   end
 
-  it 'sets minor tick size' do
-    subject.minor_tick_size(10)
-    subject.tick_size_minor.should == 10
+  describe '#tick_padding' do
+
+    it 'sets padding for the ticks' do
+      subject.tick_padding(5)
+      subject.tick_padding.should == 5
+    end
+
   end
 
-  it 'sets end tick size' do
-    subject.end_tick_size(10)
-    subject.tick_size_end.should == 10
+  describe '#tick_size' do
+
+    it 'sets size for the ticks' do
+      subject.tick_size(5)
+      subject.tick_size.should == 5
+    end
+
   end
 
-  it 'sets offset of the axis' do
-    subject.offset_by(10)
-    subject.offset.should == 10
+  describe '#tick_size_major' do
+
+    it 'sets major tick size' do
+      subject.major_tick_size(10)
+      subject.tick_size_major.should == 10
+    end
+
   end
 
-  it 'sets the layer of the axis' do
-    subject.at_front
-    subject.layer.should == :front
+  describe '#tick_size_minor' do
+
+    it 'sets minor tick size' do
+      subject.minor_tick_size(10)
+      subject.tick_size_minor.should == 10
+    end
+
   end
 
-  it 'sets if gridlines should be shown' do
-    subject.show_grid
-    subject.grid?.should be_true
+  describe '#tick_size_end' do
+
+    it 'sets end tick size' do
+      subject.end_tick_size(10)
+      subject.tick_size_end.should == 10
+    end
+
+  end
+
+  describe '#offset' do
+
+    it 'sets offset of the axis' do
+      subject.offset_by(10)
+      subject.offset.should == 10
+    end
+
+  end
+
+  describe '#layer' do
+
+    it 'sets the layer of the axis' do
+      subject.at_front
+      subject.layer.should == :front
+    end
+
+  end
+
+  describe '#grid' do
+
+    it 'sets if grid-lines should be shown' do
+      subject.show_grid
+      subject.grid?.should be_true
+    end
+
   end
 
 end
