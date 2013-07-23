@@ -37,46 +37,10 @@ module Plotrb
     #     of the enclosing group or data rectangle
     # @!attribute properties
     #   @return [Hash] optional mark property definitions for custom styling
-    attr_accessor :type, :scale, :orient, :format, :ticks, :values, :subdivide,
+    attr_writer :type, :scale, :orient, :format, :ticks, :values, :subdivide,
                   :tick_padding, :tick_size, :tick_size_major, :tick_size_minor,
                   :tick_size_end, :offset, :properties, :title, :title_offset,
                   :grid
-
-    # TODO: validates properties object using standard Vega Value References
-    class PropertiesValidator < ActiveModel::EachValidator
-      def validate_each(record, attribute, value)
-        record.errors.add(attribute, 'invalid properties for axis') unless
-            valid_keys?(value)
-      end
-
-      def valid_keys?(prop)
-        (prop.keys - %i(ticks major_ticks minor_ticks labels axis)).empty?
-      rescue NoMethodError
-        false
-      end
-    end
-
-    validates :type, presence: true, inclusion: { in: %i(x y) }
-    validates :scale, presence: true
-    validates :orient, inclusion: { in: %i(top bottom left right) },
-              allow_nil: true
-    validates :ticks, numericality: { only_integer: true, greater_than: 0 },
-              allow_nil: true
-    validates :subdivide, numericality: { only_integer: true, greater_than: 0 },
-              allow_nil: true
-    validates :tick_padding, allow_nil: true,
-              numericality: { only_integer: true, greater_than_or_equal_to: 0 }
-    validates :tick_size, allow_nil: true,
-              numericality: { only_integer: true, greater_than_or_equal_to: 0 }
-    validates :tick_size_major, allow_nil: true,
-              numericality: { only_integer: true, greater_than_or_equal_to: 0 }
-    validates :tick_size_minor, allow_nil: true,
-              numericality: { only_integer: true, greater_than_or_equal_to: 0 }
-    validates :tick_size_end, allow_nil: true,
-              numericality: { only_integer: true, greater_than_or_equal_to: 0 }
-    validates :offset, allow_nil: true,
-              numericality: { only_integer: true, greater_than_or_equal_to: 0 }
-    validates :properties, allow_nil: true, properties: true
 
     def initialize(args={})
       args.each do |k, v|
@@ -84,78 +48,228 @@ module Plotrb
       end
     end
 
-    def from(scale)
-      @scale =
-          case scale
-            when ::Plotrb::Scale
-              @scale = scale.name
-            when String
-              @scale = scale
-            else
-              nil
-          end
-      self
+    def type(*args)
+      case args.size
+        when 0
+          @type
+        when 1
+          @type = args[0]
+          self
+        else
+          raise ArgumentError
+      end
     end
 
-    def ticks(ticks)
-      @ticks = ticks.to_i
-      self
+    def scale(*args)
+      case args.size
+        when 0
+          @scale
+        when 1
+          scale = args[0]
+          @scale =
+              case scale
+                when ::Plotrb::Scale
+                  @scale = scale.name
+                when String
+                  @scale = scale
+                else
+                  raise ArgumentError
+              end
+          self
+        else
+          raise ArgumentError
+      end
     end
-
-    def subdivide_by(divide)
-      @subdivide = divide.to_i
-      self
-    end
+    alias_method :from, :scale
 
     def orient(*args)
       case args.size
         when 0
           @orient
         when 1
-          @orient = args.first.to_sym
+          @orient = args[0].to_sym
           self
         else
-          nil
+          raise ArgumentError
       end
     end
 
-    def title(title, offset=nil)
-      @title = title
-      @title_offset = offset if offset
-      self
+    def title(*args)
+      case args.size
+        when 0
+          @title
+        when 1
+          @title = args[0]
+          self
+        when 2
+          @title, @title_offset = args[0], args[1]
+          self
+        else
+          raise ArgumentError
+      end
     end
 
-    def offset_title_by(offset)
-      @title_offset = offset
-      self
+    def title_offset(*args)
+      case args.size
+        when 0
+          @title_offset
+        when 1
+          @title_offset = args[0]
+          self
+        else
+          raise ArgumentError
+      end
+    end
+    alias_method :offset_title_by, :title_offset
+
+    def format(*args)
+      case args.size
+        when 0
+          @format
+        when 1
+          @format = format
+          self
+        else
+          raise ArgumentError
+      end
     end
 
-    def format(format)
-      @format = format
-      self
+    def ticks(*args)
+      case args.size
+        when 0
+          @ticks
+        when 1
+          @ticks = args[0].to_i
+          self
+        else
+          raise ArgumentError
+      end
     end
 
-    def values(values)
-      @values = values
-      self
+    def values(*args)
+      case args.size
+        when 0
+          @values
+        when 1 # eg. values([1,2,3,4])
+          @values = args[0]
+          self
+        else # eg. values(1,2,3,4)
+          @values = args
+      end
     end
 
-    def layer(layer)
-      @layer = layer
-      self
+    def subdivide(*args)
+      case args.size
+        when 0
+          @subdivide
+        when 1
+          @subdivide = args[0].to_i
+          self
+        else
+          raise ArgumentError
+      end
+    end
+    alias_method :subdivide_by, :subdivide
+
+    def tick_padding(*args)
+      case args.size
+        when 0
+          @tick_padding
+        when 1
+          @tick_padding = args[0].to_i
+        else
+          raise ArgumentError
+      end
     end
 
-    def with_grid
+    def tick_size(*args)
+      case args.size
+        when 0
+          @tick_size
+        when 1
+          @tick_size = args[0].to_i
+        else
+          raise ArgumentError
+      end
+    end
+
+    def tick_size_major(*args)
+      case args.size
+        when 0
+          @tick_size_major
+        when 1
+          @tick_size_major = args[0].to_i
+        else
+          raise ArgumentError
+      end
+    end
+    alias_method :major_tick_size, :tick_size_major
+
+    def tick_size_minor(*args)
+      case args.size
+        when 0
+          @tick_size_minor
+        when 1
+          @tick_size_minor = args[0].to_i
+        else
+          raise ArgumentError
+      end
+    end
+    alias_method :minor_tick_size, :tick_size_minor
+
+    def tick_size_end(*args)
+      case args.size
+        when 0
+          @tick_size_end
+        when 1
+          @tick_size_end = args[0].to_i
+        else
+          raise ArgumentError
+      end
+    end
+    alias_method :end_tick_size, :tick_size_end
+
+    def offset(*args)
+      case args.size
+        when 0
+          @offset
+        when 1
+          @offset = args[0].to_i
+        else
+          raise ArgumentError
+      end
+    end
+    alias_method :offset_by, :offset
+
+    def layer(*args)
+      case args.size
+        when 0
+          @layer
+        when 1
+          @layer = args[0].to_sym
+          self
+        else
+          raise ArgumentError
+      end
+    end
+    alias_method :at_layer, :layer
+
+    def grid
       @grid = true
       self
     end
-    alias_method :show_grid, :with_grid
+    alias_method :show_grid, :grid
+    alias_method :with_grid, :grid
 
-
+    def grid?
+      @grid
+    end
+    alias_method :show_grid?, :grid?
+    alias_method :with_grid?, :grid?
 
     def method_missing(method, *args, &block)
       case method.to_s
-        when /^(\w+)\?$/ # return value of the attribute, eg. type?
+        when /^get_(\w+)$/ # return value of the attribute, eg. get_type
           if attributes.include?($1.to_sym)
             self.instance_variable_get("@#{$1.to_sym}")
           else
