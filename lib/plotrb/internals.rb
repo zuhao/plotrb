@@ -9,8 +9,8 @@ module Plotrb
 
     module ClassMethods
 
-      # override attr_accessor to keep track of attributes
-      def attr_accessor(*vars)
+      # override attr_writer to keep track of attributes
+      def attr_writer(*vars)
         @attributes ||= []
         @attributes.concat(vars)
         super
