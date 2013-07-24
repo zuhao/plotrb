@@ -46,7 +46,7 @@ module Plotrb
     #   @return [String] the name of the data set containing domain values
     # @!attributes field
     #   @return [String, Array<String>] reference to the desired data fields
-    attr_accessor :name, :type, :domain, :domain_min, :domain_max, :range,
+    attr_writer :name, :type, :domain, :domain_min, :domain_max, :range,
                   :range_min, :range_max, :reverse, :round, :points, :clamp,
                   :nice, :exponent, :zero
 
@@ -60,44 +60,112 @@ module Plotrb
       self
     end
 
-    def from(data, min=nil, max=nil)
-      @domain =
-          case data
-            when String
-              source, field = data.split('.', 2)
-              if field.nil? || field == 'index'
-                ::Plotrb::DataRef.new(data: source, field: 'index')
-              else
-                ::Plotrb::DataRef.new(data: source, field: "data.#{field}")
-              end
-            else
-                data
-            end
-      @domain_min = min
-      @domain_max = max
-      self
+    def name(*args)
+      case args.size
+        when 0
+          @name
+        when 1
+          @name = args[0]
+          self
+        else
+          raise ArgumentError
+      end
     end
 
-    def to(data, min=nil, max=nil)
-      @range = data
-      @range_min = min
-      @range_max = max
-      self
+    def type(*args)
+      case args.size
+        when 0
+          @type
+        when 1
+          @type = args[0].to_sym
+          self
+        else
+          raise ArgumentError
+      end
     end
 
-    def to_range_literal(literal)
-      @range =
-          case literal
-            when :colors
-              :category10
-            when :more_colors
-              :category20
-            when :width, :height, :shapes
-              literal
-            else
-              nil
-          end
-      self
+    def domain(*args)
+      case args.size
+        when 0
+          @domain
+        when 1
+          @domain = parse_domain(args[0])
+          self
+        when 3
+          @domain = parse_domain(args[0])
+          @domain_min = parse_domain(args[1])
+          @domain_max = parse_domain(args[2])
+          self
+        else
+          raise ArgumentError
+      end
+    end
+    alias_method :from, :domain
+
+    def domain_min(*args)
+      case args.size
+        when 0
+          @domain_min
+        when 1
+          @domain_min = parse_domain(args[0])
+          self
+        else
+          raise ArgumentError
+      end
+    end
+
+    def domain_max(*args)
+      case args.size
+        when 0
+          @domain_max
+        when 1
+          @domain_max = parse_domain(args[0])
+          self
+        else
+          raise ArgumentError
+      end
+    end
+
+    def range(*args)
+      case args.size
+        when 0
+          @range
+        when 1
+          @range = parse_range(args[0])
+          self
+        when 3
+          @range = parse_range(args[0])
+          @range_min = parse_range(args[1])
+          @range_max = parse_range(args[2])
+          self
+        else
+          raise ArgumentError
+      end
+    end
+    alias_method :to, :range
+
+    def range_min(*args)
+      case args.size
+        when 0
+          @range_min
+        when 1
+          @range_min = parse_domain(args[0])
+          self
+        else
+          raise ArgumentError
+      end
+    end
+
+    def range_max(*args)
+      case args.size
+        when 0
+          @range_max
+        when 1
+          @range_max = parse_domain(args[0])
+          self
+        else
+          raise ArgumentError
+      end
     end
 
     def reverse
@@ -105,67 +173,166 @@ module Plotrb
       self
     end
 
+    def reverse?
+      @reverse
+    end
+
     def round
       @round = true
       self
     end
 
-    def as_points
+    def round?
+      @round
+    end
+
+    def points
       @points = true
       self
     end
+    alias_method :as_points, :points
 
-    def as_bands
+    def points?
+      @points
+    end
+    alias_method :as_points?, :points?
+
+    def bands
       @points = false
       self
     end
+    alias_method :as_bands, :bands
 
-    def in_exponent(exp)
-      @exponent = exp
-      self
+    def bands?
+      !@points
     end
+    alias_method :as_bands?, :bands?
 
-    def nicely(val=nil)
-      if %i(time utc).include?(@type)
-        @nice = val
-      else
-        @nice = true
+    def exponent(*args)
+      case args.size
+        when 0
+          @exponent
+        when 1
+          @exponent = args[0]
+          self
+        else
+          raise ArgumentError
       end
-      self
     end
+    alias_method :in_exponent, :exponent
 
-    def include_zero
+    def nice(*args)
+      if %i(time utc).include?(@type)
+        # nice literals only for time and utc types
+        case args.size
+          when 0
+            # getter
+            @nice
+          when 1
+            # setter
+            @nice = args[0].to_sym
+            self
+          else
+            raise ArgumentError
+        end
+      else
+        # boolean for all other types
+        case args.size
+          when 0
+            # setter
+            @nice = true
+            self
+          else
+            raise ArgumentError
+        end
+      end
+    end
+    alias_method :nicely, :nice
+
+    def nice?
+      if %i(time utc).include?(@type)
+        raise NoMethodError
+      else
+        # getter
+        @nice
+      end
+    end
+    alias_method :nicely?, :nice?
+
+    def zero
       @zero = true
       self
     end
+    alias_method :include_zero, :zero
+
+    def zero?
+      @zero
+    end
+    alias_method :include_zero?, :zero?
 
     def clamp
       @clamp = true
       self
     end
 
+    def clamp?
+      @clamp
+    end
+
     def method_missing(method, *args, &block)
       case method.to_s
-        when /(\w+)\?$/ # return value of the attribute, eg. type?
-          if attributes.include?($1.to_sym)
-            self.instance_variable_get("@#{$1.to_sym}")
-          else
-            super
-          end
         when /in_(\w+)s$/ # set @nice for time and utc type, eg. in_seconds
           if TIME_SCALE_NICE.include?($1.to_sym)
-            self.nicely($1.to_sym)
+            self.nice($1.to_sym)
           else
             super
           end
         when /to_(\w+)$/ # set range literals, eg. to_more_colors
           if RANGE_LITERALS.include?($1.to_sym)
-            self.to_range_literal($1.to_sym)
+            self.range($1.to_sym)
           else
             super
           end
         else
           super
+      end
+    end
+
+  private
+
+    def parse_domain(domain)
+      case domain
+        when String
+          source, field = domain.split('.', 2)
+          if field.nil? || field == 'index'
+            ::Plotrb::DataRef.new(data: source, field: 'index')
+          else
+            ::Plotrb::DataRef.new(data: source, field: "data.#{field}")
+          end
+        else
+          domain
+      end
+    end
+
+    def parse_range(range)
+      case range
+        when String, Symbol
+          range_literal(range.to_sym)
+        else
+          range
+      end
+    end
+
+    def range_literal(literal)
+      case literal
+        when :colors
+          :category10
+        when :more_colors
+          :category20
+        when :width, :height, :shapes
+          literal
+        else
+          raise ArgumentError
       end
     end
 
