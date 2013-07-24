@@ -120,7 +120,7 @@ describe 'Scale' do
       it 'sets nice to true' do
         subject.type = :linear
         subject.nicely
-        subject.nice.should == true
+        subject.nice?.should be_true
       end
     end
 
@@ -130,17 +130,17 @@ describe 'Scale' do
 
     it 'returns value of the attributes if ends with ?' do
       subject.type = :linear
-      subject.type?.should == :linear
+      subject.type.should == :linear
     end
 
     it 'calls nicely if in_foo is called' do
       subject.type = :time
-      subject.should_receive(:nicely).with(:second)
+      subject.should_receive(:nice).with(:second)
       subject.in_seconds
     end
 
     it 'calls to_range_literal if to_foo is called' do
-      subject.should_receive(:to_range_literal).with(:colors)
+      subject.should_receive(:range).with(:colors)
       subject.to_colors
     end
 
