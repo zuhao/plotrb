@@ -128,11 +128,6 @@ describe 'Scale' do
 
   describe '#method_missing' do
 
-    it 'returns value of the attributes if ends with ?' do
-      subject.type = :linear
-      subject.type.should == :linear
-    end
-
     it 'calls nicely if in_foo is called' do
       subject.type = :time
       subject.should_receive(:nice).with(:second)
