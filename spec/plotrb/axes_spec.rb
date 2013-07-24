@@ -168,4 +168,28 @@ describe 'Axis' do
 
   end
 
+  describe '#method_missing' do
+
+    it 'sets ticks if in_some_ticks is called' do
+      subject.in_20_ticks
+      subject.ticks.should == 20
+    end
+
+    it 'sets subdivide if subdivide_by_some is called' do
+      subject.subdivide_by_10
+      subject.subdivide.should == 10
+    end
+
+    it 'sets orient if at_orient_position is called' do
+      subject.at_bottom
+      subject.orient.should == :bottom
+    end
+
+    it 'sets layer if at_layer_position is called' do
+      subject.at_front
+      subject.layer.should == :front
+    end
+
+  end
+
 end
