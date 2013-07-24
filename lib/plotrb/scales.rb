@@ -48,7 +48,7 @@ module Plotrb
     #   @return [String, Array<String>] reference to the desired data fields
     attr_writer :name, :type, :domain, :domain_min, :domain_max, :range,
                   :range_min, :range_max, :reverse, :round, :points, :clamp,
-                  :nice, :exponent, :zero
+                  :nice, :exponent, :zero, :padding, :sort
 
     RANGE_LITERALS = %i(width height shapes colors more_colors)
     TIME_SCALE_NICE = %i(second minute hour day week month year)
@@ -207,6 +207,27 @@ module Plotrb
       !@points
     end
     alias_method :as_bands?, :bands?
+
+    def padding(*args)
+      case args.size
+        when 0
+          @padding
+        when 1
+          @padding = args[0].to_f
+          self
+        else
+          raise ArgumentError
+      end
+    end
+
+    def sort
+      @sort = true
+      self
+    end
+
+    def sort?
+      @sort
+    end
 
     def exponent(*args)
       case args.size
