@@ -6,7 +6,6 @@ module Plotrb
   class Scale
 
     include ::Plotrb::Internals
-    include ActiveModel::Validations
 
     # @!attributes name
     #   @return [String] the name of the scale
@@ -53,17 +52,6 @@ module Plotrb
 
     RANGE_LITERALS = %i(width height shapes colors more_colors)
     TIME_SCALE_NICE = %i(second minute hour day week month year)
-
-    class DomainValidator < ActiveModel::EachValidator
-      def validate_each(record, attribute, value)
-        record.errors.add(attribute, 'invalid domain')
-      end
-    end
-
-    validates :name, presence: true, length: { minimum: 1 }
-    validates :type, allow_nil: true,
-              inclusion: { in: %i(linear ordinal time utc log pow sqrt quantile
-                                  quantize threshold) }
 
     def initialize(args={})
       args.each do |k, v|
