@@ -4,7 +4,29 @@ describe 'Scale' do
 
   subject { ::Plotrb::Scale.new }
 
-  describe '#from' do
+  describe '#name' do
+
+    it 'sets name of the scale' do
+      subject.name = 'foo_scale'
+      subject.name.should == 'foo_scale'
+    end
+
+    it 'raises error if the name is not unique'
+
+  end
+
+  describe '#type' do
+
+    it 'sets type of the scale' do
+      subject.type = :linear
+      subject.type.should == :linear
+    end
+
+    it 'raises error if type is unrecognized'
+
+  end
+
+  describe '#domain' do
 
     context 'when domain is a string reference to a data source' do
 
@@ -43,9 +65,19 @@ describe 'Scale' do
 
     end
 
+    it 'sets domain_min and domain_max if both provided' do
+      subject.domain('some_data', 1, 100)
+      subject.domain_min.should == 1
+      subject.domain_max.should == 100
+    end
+
+    it 'raises error if only one of min/max is provided' do
+      expect { subject.domain('some_data', 1) }.to raise_error(ArgumentError)
+    end
+
   end
 
-  describe '#to' do
+  describe '#range' do
 
     context 'when range is numeric' do
 
@@ -66,27 +98,37 @@ describe 'Scale' do
 
     end
 
-  end
+    context 'when range is special literal' do
 
-  describe '#to_range_literal' do
+      it 'sets correct range literal' do
+        subject.to_colors
+        subject.range.should == :category10
+        subject.to_more_colors
+        subject.range.should == :category20
+        subject.to_shapes
+        subject.range.should == :shapes
+      end
 
-    it 'sets correct range literal' do
-      subject.to_colors
-      subject.range.should == :category10
-      subject.to_more_colors
-      subject.range.should == :category20
-      subject.to_shapes
-      subject.range.should == :shapes
+      it 'does not set invalid range literal' do
+        expect { subject.to_foo_bar_range }.to raise_error(NoMethodError)
+        subject.range.should be_nil
+      end
+
     end
 
-    it 'does not set invalid range literal' do
-      expect { subject.to_foo_bar_range }.to raise_error(NoMethodError)
-      subject.range.should be_nil
+    it 'sets range_min and range_max if both provided' do
+      subject.range([0, 200], 1, 100)
+      subject.range_min.should == 1
+      subject.range_max.should == 100
+    end
+
+    it 'raises error if only one of min/max is provided' do
+      expect { subject.range([0, 100], 1) }.to raise_error(ArgumentError)
     end
 
   end
 
-  describe '#in_exponent' do
+  describe '#exponent' do
 
     it 'sets the exponent of scale transformation' do
       subject.in_exponent(10)
@@ -95,7 +137,7 @@ describe 'Scale' do
 
   end
 
-  describe '#nicely' do
+  describe '#nice' do
 
     context 'when scale is time or utc' do
 
@@ -122,19 +164,20 @@ describe 'Scale' do
         subject.nicely
         subject.nice?.should be_true
       end
+
     end
 
   end
 
   describe '#method_missing' do
 
-    it 'calls nicely if in_foo is called' do
+    it 'calls nice if in_foo is called' do
       subject.type = :time
       subject.should_receive(:nice).with(:second)
       subject.in_seconds
     end
 
-    it 'calls to_range_literal if to_foo is called' do
+    it 'calls range if to_foo is called' do
       subject.should_receive(:range).with(:colors)
       subject.to_colors
     end
