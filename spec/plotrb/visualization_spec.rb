@@ -1,7 +1,6 @@
 require_relative '../spec_helper'
-require_relative '../../lib/plotrb/visualization'
 
-describe 'Visualization' do
+describe 'Visualization', :broken => true do
 
   context 'properties' do
 

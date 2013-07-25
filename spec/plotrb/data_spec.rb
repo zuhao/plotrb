@@ -1,8 +1,6 @@
 require_relative '../spec_helper'
-require_relative '../../lib/plotrb/data'
-require_relative '../../lib/plotrb/transforms'
 
-describe 'Data' do
+describe 'Data', :broken => true do
 
   before(:each) do
     @data = ::Plotrb::Data.new
