@@ -184,4 +184,20 @@ describe 'Scale' do
 
   end
 
+  it 'allows block-style DSL' do
+    subject.name('some_scale') do
+      type :time
+      from('some_data_file.some_field').to_width
+      reverse
+      in_seconds
+    end
+    subject.name.should == 'some_scale'
+    subject.type.should == :time
+    subject.domain.data.should == 'some_data_file'
+    subject.domain.field.should == 'data.some_field'
+    subject.range.should == :width
+    subject.reverse.should be_true
+    subject.nice.should == :second
+  end
+
 end

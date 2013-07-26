@@ -192,4 +192,18 @@ describe 'Axis' do
 
   end
 
+  it 'allows block-style DSL' do
+    subject.from('some_scale').at_bottom do
+      at_layer :front
+      in_20_ticks.subdivide_by 5
+      show_grid
+    end
+    subject.scale.should == 'some_scale'
+    subject.orient.should == :bottom
+    subject.layer.should == :front
+    subject.ticks.should == 20
+    subject.subdivide.should == 5
+    subject.grid.should be_true
+  end
+
 end
