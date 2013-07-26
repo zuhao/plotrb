@@ -54,48 +54,53 @@ module Plotrb
     RANGE_LITERALS = %i(width height shapes colors more_colors)
     TIME_SCALE_NICE = %i(second minute hour day week month year)
 
-    def initialize(args={})
+    def initialize(args={}, &block)
       args.each do |k, v|
         self.instance_variable_set("@#{k}", v) if self.attributes.include?(k)
       end
+      self.instance_eval(&block) if block_given?
       self
     end
 
-    def name(*args)
+    def name(*args, &block)
       case args.size
         when 0
           @name
         when 1
           @name = args[0]
+          self.instance_eval(&block) if block_given?
           self
         else
           raise ArgumentError
       end
     end
 
-    def type(*args)
+    def type(*args, &block)
       case args.size
         when 0
           @type
         when 1
           @type = args[0].to_sym
+          self.instance_eval(&block) if block_given?
           self
         else
           raise ArgumentError
       end
     end
 
-    def domain(*args)
+    def domain(*args, &block)
       case args.size
         when 0
           @domain
         when 1
           @domain = parse_domain(args[0])
+          self.instance_eval(&block) if block_given?
           self
         when 3
           @domain = parse_domain(args[0])
           @domain_min = parse_domain(args[1])
           @domain_max = parse_domain(args[2])
+          self.instance_eval(&block) if block_given?
           self
         else
           raise ArgumentError
@@ -103,41 +108,45 @@ module Plotrb
     end
     alias_method :from, :domain
 
-    def domain_min(*args)
+    def domain_min(*args, &block)
       case args.size
         when 0
           @domain_min
         when 1
           @domain_min = parse_domain(args[0])
+          self.instance_eval(&block) if block_given?
           self
         else
           raise ArgumentError
       end
     end
 
-    def domain_max(*args)
+    def domain_max(*args, &block)
       case args.size
         when 0
           @domain_max
         when 1
           @domain_max = parse_domain(args[0])
+          self.instance_eval(&block) if block_given?
           self
         else
           raise ArgumentError
       end
     end
 
-    def range(*args)
+    def range(*args, &block)
       case args.size
         when 0
           @range
         when 1
           @range = parse_range(args[0])
+          self.instance_eval(&block) if block_given?
           self
         when 3
           @range = parse_range(args[0])
           @range_min = parse_range(args[1])
           @range_max = parse_range(args[2])
+          self.instance_eval(&block) if block_given?
           self
         else
           raise ArgumentError
@@ -145,32 +154,35 @@ module Plotrb
     end
     alias_method :to, :range
 
-    def range_min(*args)
+    def range_min(*args, &block)
       case args.size
         when 0
           @range_min
         when 1
           @range_min = parse_domain(args[0])
+          self.instance_eval(&block) if block_given?
           self
         else
           raise ArgumentError
       end
     end
 
-    def range_max(*args)
+    def range_max(*args, &block)
       case args.size
         when 0
           @range_max
         when 1
           @range_max = parse_domain(args[0])
+          self.instance_eval(&block) if block_given?
           self
         else
           raise ArgumentError
       end
     end
 
-    def reverse
+    def reverse(&block)
       @reverse = true
+      self.instance_eval(&block) if block_given?
       self
     end
 
@@ -178,8 +190,9 @@ module Plotrb
       @reverse
     end
 
-    def round
+    def round(&block)
       @round = true
+      self.instance_eval(&block) if block_given?
       self
     end
 
@@ -187,8 +200,9 @@ module Plotrb
       @round
     end
 
-    def points
+    def points(&block)
       @points = true
+      self.instance_eval(&block) if block_given?
       self
     end
     alias_method :as_points, :points
@@ -198,8 +212,9 @@ module Plotrb
     end
     alias_method :as_points?, :points?
 
-    def bands
+    def bands(&block)
       @points = false
+      self.instance_eval(&block) if block_given?
       self
     end
     alias_method :as_bands, :bands
@@ -209,20 +224,22 @@ module Plotrb
     end
     alias_method :as_bands?, :bands?
 
-    def padding(*args)
+    def padding(*args, &block)
       case args.size
         when 0
           @padding
         when 1
           @padding = args[0].to_f
+          self.instance_eval(&block) if block_given?
           self
         else
           raise ArgumentError
       end
     end
 
-    def sort
+    def sort(&block)
       @sort = true
+      self.instance_eval(&block) if block_given?
       self
     end
 
@@ -230,12 +247,13 @@ module Plotrb
       @sort
     end
 
-    def exponent(*args)
+    def exponent(*args, &block)
       case args.size
         when 0
           @exponent
         when 1
           @exponent = args[0]
+          self.instance_eval(&block) if block_given?
           self
         else
           raise ArgumentError
@@ -243,7 +261,7 @@ module Plotrb
     end
     alias_method :in_exponent, :exponent
 
-    def nice(*args)
+    def nice(*args, &block)
       if %i(time utc).include?(@type)
         # nice literals only for time and utc types
         case args.size
@@ -253,6 +271,7 @@ module Plotrb
           when 1
             # setter
             @nice = args[0].to_sym
+            self.instance_eval(&block) if block_given?
             self
           else
             raise ArgumentError
@@ -263,6 +282,7 @@ module Plotrb
           when 0
             # setter
             @nice = true
+            self.instance_eval(&block) if block_given?
             self
           else
             raise ArgumentError
@@ -281,8 +301,9 @@ module Plotrb
     end
     alias_method :nicely?, :nice?
 
-    def zero
+    def zero(&block)
       @zero = true
+      self.instance_eval(&block) if block_given?
       self
     end
     alias_method :include_zero, :zero
@@ -292,8 +313,9 @@ module Plotrb
     end
     alias_method :include_zero?, :zero?
 
-    def clamp
+    def clamp(&block)
       @clamp = true
+      self.instance_eval(&block) if block_given?
       self
     end
 

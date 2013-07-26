@@ -47,25 +47,28 @@ module Plotrb
                   :tick_size_end, :offset, :properties, :title, :title_offset,
                   :grid
 
-    def initialize(args={})
+    def initialize(args={}, &block)
       args.each do |k, v|
         self.instance_variable_set("@#{k}", v) if self.attributes.include?(k)
       end
+      self.instance_eval(&block) if block_given?
+      self
     end
 
-    def type(*args)
+    def type(*args, &block)
       case args.size
         when 0
           @type
         when 1
           @type = args[0]
+          self.instance_eval(&block) if block_given?
           self
         else
           raise ArgumentError
       end
     end
 
-    def scale(*args)
+    def scale(*args, &block)
       case args.size
         when 0
           @scale
@@ -80,6 +83,7 @@ module Plotrb
                 else
                   raise ArgumentError
               end
+          self.instance_eval(&block) if block_given?
           self
         else
           raise ArgumentError
@@ -87,12 +91,13 @@ module Plotrb
     end
     alias_method :from, :scale
 
-    def orient(*args)
+    def orient(*args, &block)
       case args.size
         when 0
           @orient
         when 1
           @orient = args[0].to_sym
+          self.instance_eval(&block) if block_given?
           self
         else
           raise ArgumentError
@@ -100,27 +105,30 @@ module Plotrb
     end
     alias_method :at_orient, :orient
 
-    def title(*args)
+    def title(*args, &block)
       case args.size
         when 0
           @title
         when 1
           @title = args[0]
+          self.instance_eval(&block) if block_given?
           self
         when 2
           @title, @title_offset = args[0], args[1]
+          self.instance_eval(&block) if block_given?
           self
         else
           raise ArgumentError
       end
     end
 
-    def title_offset(*args)
+    def title_offset(*args, &block)
       case args.size
         when 0
           @title_offset
         when 1
           @title_offset = args[0]
+          self.instance_eval(&block) if block_given?
           self
         else
           raise ArgumentError
@@ -128,48 +136,54 @@ module Plotrb
     end
     alias_method :offset_title_by, :title_offset
 
-    def format(*args)
+    def format(*args, &block)
       case args.size
         when 0
           @format
         when 1
           @format = format
+          self.instance_eval(&block) if block_given?
           self
         else
           raise ArgumentError
       end
     end
 
-    def ticks(*args)
+    def ticks(*args, &block)
       case args.size
         when 0
           @ticks
         when 1
           @ticks = args[0].to_i
+          self.instance_eval(&block) if block_given?
           self
         else
           raise ArgumentError
       end
     end
 
-    def values(*args)
+    def values(*args, &block)
       case args.size
         when 0
           @values
         when 1 # eg. values([1,2,3,4])
           @values = args[0]
+          self.instance_eval(&block) if block_given?
           self
         else # eg. values(1,2,3,4)
           @values = args
+          self.instance_eval(&block) if block_given?
+          self
       end
     end
 
-    def subdivide(*args)
+    def subdivide(*args, &block)
       case args.size
         when 0
           @subdivide
         when 1
           @subdivide = args[0].to_i
+          self.instance_eval(&block) if block_given?
           self
         else
           raise ArgumentError
@@ -177,82 +191,95 @@ module Plotrb
     end
     alias_method :subdivide_by, :subdivide
 
-    def tick_padding(*args)
+    def tick_padding(*args, &block)
       case args.size
         when 0
           @tick_padding
         when 1
           @tick_padding = args[0].to_i
+          self.instance_eval(&block) if block_given?
+          self
         else
           raise ArgumentError
       end
     end
 
-    def tick_size(*args)
+    def tick_size(*args, &block)
       case args.size
         when 0
           @tick_size
         when 1
           @tick_size = args[0].to_i
+          self.instance_eval(&block) if block_given?
+          self
         else
           raise ArgumentError
       end
     end
 
-    def tick_size_major(*args)
+    def tick_size_major(*args, &block)
       case args.size
         when 0
           @tick_size_major
         when 1
           @tick_size_major = args[0].to_i
+          self.instance_eval(&block) if block_given?
+          self
         else
           raise ArgumentError
       end
     end
     alias_method :major_tick_size, :tick_size_major
 
-    def tick_size_minor(*args)
+    def tick_size_minor(*args, &block)
       case args.size
         when 0
           @tick_size_minor
         when 1
           @tick_size_minor = args[0].to_i
+          self.instance_eval(&block) if block_given?
+          self
         else
           raise ArgumentError
       end
     end
     alias_method :minor_tick_size, :tick_size_minor
 
-    def tick_size_end(*args)
+    def tick_size_end(*args, &block)
       case args.size
         when 0
           @tick_size_end
         when 1
           @tick_size_end = args[0].to_i
+          self.instance_eval(&block) if block_given?
+          self
         else
           raise ArgumentError
       end
     end
     alias_method :end_tick_size, :tick_size_end
 
-    def offset(*args)
+    def offset(*args, &block)
       case args.size
         when 0
           @offset
         when 1
           @offset = args[0].to_i
+          self.instance_eval(&block) if block_given?
+          self
         else
           raise ArgumentError
       end
     end
     alias_method :offset_by, :offset
 
-    def layer(*args)
+    def layer(*args, &block)
       case args.size
         when 0
           @layer
         when 1
           @layer = args[0].to_sym
+          self.instance_eval(&block) if block_given?
           self
         else
           raise ArgumentError
@@ -260,8 +287,9 @@ module Plotrb
     end
     alias_method :at_layer, :layer
 
-    def grid
+    def grid(&block)
       @grid = true
+      self.instance_eval(&block) if block_given?
       self
     end
     alias_method :show_grid, :grid
