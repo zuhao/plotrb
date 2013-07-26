@@ -304,13 +304,13 @@ module Plotrb
     def method_missing(method, *args, &block)
       case method.to_s
         when /^in_(\d+)_ticks$/  # set number of ticks. eg. in_20_ticks
-          self.ticks($1.to_i)
+          self.ticks($1.to_i, &block)
         when /^subdivide_by_(\d+)$/ # set subdivide of ticks
-          self.subdivide($1.to_i)
+          self.subdivide($1.to_i, &block)
         when /^at_(top|bottom|left|right)$/ # set orient of the axis
-          self.orient($1.to_sym)
+          self.orient($1.to_sym, &block)
         when /^at_(front|back)$/ # set layer of the axis
-          self.layer($1.to_sym)
+          self.layer($1.to_sym, &block)
         else
           super
       end

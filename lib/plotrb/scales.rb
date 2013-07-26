@@ -327,13 +327,13 @@ module Plotrb
       case method.to_s
         when /in_(\w+)s$/ # set @nice for time and utc type, eg. in_seconds
           if TIME_SCALE_NICE.include?($1.to_sym)
-            self.nice($1.to_sym)
+            self.nice($1.to_sym, &block)
           else
             super
           end
         when /to_(\w+)$/ # set range literals, eg. to_more_colors
           if RANGE_LITERALS.include?($1.to_sym)
-            self.range($1.to_sym)
+            self.range($1.to_sym, &block)
           else
             super
           end
