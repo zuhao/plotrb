@@ -42,10 +42,11 @@ module Plotrb
     #   @return [Numeric] the exponent of the scale transformation
     # @!attributes zero
     #   @return [Boolean] whether zero baseline value is included
-    # @!attributes data
-    #   @return [String] the name of the data set containing domain values
-    # @!attributes field
-    #   @return [String, Array<String>] reference to the desired data fields
+    # @!attributes padding
+    #   @return [Numeric] the spacing among ordinal elements in the scale range
+    # @!attributes sort
+    #   @return [Boolean] whether values in the scale domain will be sorted
+    #     according to their natural order
     attr_accessor :name, :type, :domain, :domain_min, :domain_max, :range,
                   :range_min, :range_max, :reverse, :round, :points, :clamp,
                   :nice, :exponent, :zero, :padding, :sort
