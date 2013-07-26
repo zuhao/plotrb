@@ -4,7 +4,7 @@ module Plotrb
   # See {https://github.com/trifacta/vega/wiki/Marks}
   class Mark
 
-    include ::Plotrb::Internals
+    include ::Plotrb::Base
     include ActiveModel::Validations
 
     TYPES = %i(rect symbol path arc area line image text)
@@ -85,7 +85,7 @@ module Plotrb
   # A value reference specifies the value for a given mark property
   class ValueRef
 
-    include ::Plotrb::Internals
+    include ::Plotrb::Base
     include ActiveModel::Validations
 
     # @!attributes value

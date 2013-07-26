@@ -4,7 +4,7 @@ require 'uri'
 require 'hashie'
 require 'active_model'
 
-require_relative 'plotrb/internals'
+require_relative 'plotrb/base'
 require_relative 'plotrb/validators'
 
 require_relative 'plotrb/visualization'

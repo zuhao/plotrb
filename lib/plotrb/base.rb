@@ -1,7 +1,7 @@
 module Plotrb
 
   # Some internal methods for mixin
-  module Internals
+  module Base
 
     def self.included(base)
       base.extend(ClassMethods)
@@ -9,8 +9,8 @@ module Plotrb
 
     module ClassMethods
 
-      # override attr_writer to keep track of attributes
-      def attr_writer(*vars)
+      # override attr_accessor to keep track of attributes
+      def attr_accessor(*vars)
         @attributes ||= []
         @attributes.concat(vars)
         super

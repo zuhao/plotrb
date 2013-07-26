@@ -4,7 +4,7 @@ module Plotrb
   # See {https://github.com/trifacta/vega/wiki/Data}
   class Data
 
-    include ::Plotrb::Internals
+    include ::Plotrb::Base
     include ::Plotrb::Validators
     include ActiveModel::Validations
 

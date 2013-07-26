@@ -2,7 +2,7 @@ module Plotrb
 
   module Validators
 
-    include ::Plotrb::Internals
+    include ::Plotrb::Base
     extend self
 
     def array_of_type?(type, arr, size=nil)

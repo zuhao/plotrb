@@ -5,7 +5,7 @@ module Plotrb
   # See {https://github.com/trifacta/vega/wiki/Data-Transforms}
   class Transform
 
-    include ::Plotrb::Internals
+    include ::Plotrb::Base
     include ::Plotrb::Validators
     include ActiveModel::Validations
 

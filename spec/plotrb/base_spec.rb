@@ -1,11 +1,11 @@
 require_relative '../spec_helper'
 
-describe 'Internals', :broken => true do
+describe 'Base', :broken => true do
 
   describe 'setting attributes for each instance' do
 
     class FooClass
-      include ::Plotrb::Internals
+      include ::Plotrb::Base
       attr_accessor :bar_bar
       def initialize
         self.singleton_class.class_eval do
@@ -23,7 +23,7 @@ describe 'Internals', :broken => true do
     end
 
     class BarClass
-      include ::Plotrb::Internals
+      include ::Plotrb::Base
       def initialize
         self.singleton_class.class_eval do
           attr_accessor :qux
@@ -65,7 +65,7 @@ describe 'Internals', :broken => true do
   describe 'classifying strings' do
 
     class Foo
-      include ::Plotrb::Internals
+      include ::Plotrb::Base
     end
 
     let(:foo) { Foo.new }
@@ -87,7 +87,7 @@ describe 'Internals', :broken => true do
   describe 'collecting attributes into hash' do
 
     class Foo
-      include ::Plotrb::Internals
+      include ::Plotrb::Base
       attr_accessor :attr
     end
 

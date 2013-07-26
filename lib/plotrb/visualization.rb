@@ -5,7 +5,7 @@ module Plotrb
   class Visualization
 
     include ::Plotrb::Validators
-    include ::Plotrb::Internals
+    include ::Plotrb::Base
     include ActiveModel::Validations
 
     # @!attributes name

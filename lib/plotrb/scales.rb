@@ -5,7 +5,7 @@ module Plotrb
   # See {https://github.com/trifacta/vega/wiki/Scales}
   class Scale
 
-    include ::Plotrb::Internals
+    include ::Plotrb::Base
 
     # @!attributes name
     #   @return [String] the name of the scale
@@ -46,7 +46,7 @@ module Plotrb
     #   @return [String] the name of the data set containing domain values
     # @!attributes field
     #   @return [String, Array<String>] reference to the desired data fields
-    attr_writer :name, :type, :domain, :domain_min, :domain_max, :range,
+    attr_accessor :name, :type, :domain, :domain_min, :domain_max, :range,
                   :range_min, :range_max, :reverse, :round, :points, :clamp,
                   :nice, :exponent, :zero, :padding, :sort
 
@@ -362,7 +362,7 @@ module Plotrb
   # A data reference specifies the field for a given scale property
   class DataRef
 
-    include ::Plotrb::Internals
+    include ::Plotrb::Base
 
     # @!attributes data
     #   @return [String] the name of a data set
