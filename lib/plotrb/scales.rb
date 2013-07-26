@@ -377,6 +377,32 @@ module Plotrb
       end
     end
 
+    def data(*args, &block)
+      case args.size
+        when 0
+          @data
+        when 1
+          @data = args[0]
+          self.instance_eval(&block) if block_given?
+          self
+        else
+          raise ArgumentError
+      end
+    end
+
+    def field(*args, &block)
+      case args.size
+        when 0
+          @field
+        when 1
+          @field = args[0]
+          self.instance_eval(&block) if block_given?
+          self
+        else
+          raise ArgumentError
+      end
+    end
+
   end
 
 end
