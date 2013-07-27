@@ -1,7 +1,6 @@
 require 'yajl'
 require 'json'
 require 'uri'
-require 'hashie'
 require 'active_model'
 
 require_relative 'plotrb/base'
