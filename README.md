@@ -1,5 +1,7 @@
 # Plotrb
 
+[![Build Status](https://travis-ci.org/zuhao/plotrb.png)](https://travis-ci.org/zuhao/plotrb)
+
 TODO: Write a gem description
 
 ## Installation
