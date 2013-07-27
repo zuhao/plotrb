@@ -103,7 +103,6 @@ module Plotrb
           raise ArgumentError
       end
     end
-    alias_method :at_orient, :orient
 
     def title(*args, &block)
       case args.size
@@ -285,7 +284,6 @@ module Plotrb
           raise ArgumentError
       end
     end
-    alias_method :at_layer, :layer
 
     def grid(&block)
       @grid = true
@@ -303,13 +301,13 @@ module Plotrb
 
     def method_missing(method, *args, &block)
       case method.to_s
-        when /^in_(\d+)_ticks$/  # set number of ticks. eg. in_20_ticks
+        when /^with_(\d+)_ticks$/  # set number of ticks. eg. in_20_ticks
           self.ticks($1.to_i, &block)
         when /^subdivide_by_(\d+)$/ # set subdivide of ticks
           self.subdivide($1.to_i, &block)
         when /^at_(top|bottom|left|right)$/ # set orient of the axis
           self.orient($1.to_sym, &block)
-        when /^at_(front|back)$/ # set layer of the axis
+        when /^in_(front|back)$/ # set layer of the axis
           self.layer($1.to_sym, &block)
         else
           super

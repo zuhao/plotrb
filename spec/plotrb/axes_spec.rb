@@ -67,7 +67,7 @@ describe 'Axis' do
   describe '#ticks' do
 
     it 'sets ticks of the axis' do
-      subject.in_20_ticks
+      subject.with_20_ticks
       subject.ticks.should == 20
     end
 
@@ -153,7 +153,7 @@ describe 'Axis' do
   describe '#layer' do
 
     it 'sets the layer of the axis' do
-      subject.at_front
+      subject.in_front
       subject.layer.should == :front
     end
 
@@ -171,7 +171,7 @@ describe 'Axis' do
   describe '#method_missing' do
 
     it 'sets ticks if in_some_ticks is called' do
-      subject.in_20_ticks
+      subject.with_20_ticks
       subject.ticks.should == 20
     end
 
@@ -186,7 +186,7 @@ describe 'Axis' do
     end
 
     it 'sets layer if at_layer_position is called' do
-      subject.at_front
+      subject.in_front
       subject.layer.should == :front
     end
 
@@ -194,8 +194,8 @@ describe 'Axis' do
 
   it 'allows block-style DSL' do
     subject.from('some_scale').at_bottom do
-      at_layer :front
-      in_20_ticks.subdivide_by 5
+      layer :front
+      with_20_ticks.subdivide_by 5
       show_grid
     end
     subject.scale.should == 'some_scale'
