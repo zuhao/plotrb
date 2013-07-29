@@ -285,6 +285,26 @@ module Plotrb
       end
     end
 
+    def above(*args, &block)
+      @layer = :front
+      self.instance_eval(&block) if block_given?
+      self
+    end
+
+    def above?
+      @layer == :front
+    end
+
+    def below(&block)
+      @layer = :back
+      self.instance_eval(&block) if block_given?
+      self
+    end
+
+    def below?
+      @layer == :back
+    end
+
     def grid(&block)
       @grid = true
       self.instance_eval(&block) if block_given?
