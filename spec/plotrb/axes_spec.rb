@@ -159,6 +159,26 @@ describe 'Axis' do
 
   end
 
+  describe 'above' do
+
+    it 'sets the layer to front' do
+      subject.above
+      subject.layer.should == :front
+      subject.above?.should be_true
+    end
+
+  end
+
+  describe 'below' do
+
+    it 'sets the layer to back' do
+      subject.below
+      subject.layer.should == :back
+      subject.below?.should be_true
+    end
+
+  end
+
   describe '#grid' do
 
     it 'sets if grid-lines should be shown' do
