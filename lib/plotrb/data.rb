@@ -20,17 +20,84 @@ module Plotrb
     #   @return [Array<Transform>] an array of transform definitions
     attr_accessor :name, :format, :values, :source, :url, :transform
 
-    def initialize(args={})
+    def initialize(args={}, &block)
       args.each do |k, v|
         self.instance_variable_set("@#{k}", v) if self.attributes.include?(k)
       end
+      self.instance_eval(&block) if block_given?
+      self
     end
 
-      end
-
+    def name(*args, &block)
+      case args.size
+        when 0
+          @name
+        when 1
+          @name = args[0].to_s
+          self.instance_eval(&block) if block_given?
+          self
+        else
+          raise ArgumentError
       end
     end
 
+    # TODO: parse format properly
+    def format(*args, &block)
+      case args.size
+        when 0
+          @format
+        when 1
+          @format = args[0].to_sym
+          self.instance_eval(&block) if block_given?
+          self
+        else
+          raise ArgumentError
+      end
+    end
+
+    def values(*args, &block)
+      case args.size
+        when 0
+          @values
+        else
+          @values = args
+      end
+    end
+
+    def source(*args, &block)
+      case args.size
+        when 0
+          @source
+        when 1
+          @source = parse_source(args[0])
+          self.instance_eval(&block) if block_given?
+          self
+        else
+          raise ArgumentError
+      end
+    end
+
+    def url(*args, &block)
+      case args.size
+        when 0
+          @url
+        when 1
+          @url = parse_url(args[0])
+          self.instance_eval(&block) if block_given?
+          self
+        else
+          raise ArgumentError
+      end
+    end
+
+    def transform(*args, &block)
+      case args.size
+        when 0
+          @transform
+        else
+          @transform = parse_transform(args)
+          self.instance_eval(&block) if block_given?
+          self
       end
     end
 
@@ -55,6 +122,37 @@ module Plotrb
       end
     end
 
+  private
+
+    def parse_transform(transform)
+      case transform
+        when Array
+          transform.collect { |t| parse_transform(t) }
+        when String
+          transform
+        when ::Plotrb::Transform
+          transform.name
+        else
+          raise ArgumentError
+      end
+    end
+
+    def parse_source(source)
+      case source
+        when String
+          source
+        when ::Plotrb::Data
+          source.name
+        else
+          raise ArgumentError
+      end
+    end
+
+    def parse_url(url)
+      url if URI.parse(url)
+    rescue URI::InvalidURIError
+      raise ArgumentError
+    end
 
   end
 
