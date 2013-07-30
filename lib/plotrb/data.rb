@@ -5,8 +5,6 @@ module Plotrb
   class Data
 
     include ::Plotrb::Base
-    include ::Plotrb::Validators
-    include ActiveModel::Validations
 
     # @!attributes name
     #   @return [String] the name of the data set
@@ -28,22 +26,11 @@ module Plotrb
       end
     end
 
-    class UrlValidator < ActiveModel::EachValidator
-      def validate_each(record, attribute, value)
-        record.errors.add(attribute, 'invalid url') unless valid_url?(value)
       end
 
-      def valid_url?(url)
-        URI.parse(url)
-      rescue URI::InvalidURIError
-        false
       end
     end
 
-    class TransformValidator < ActiveModel::EachValidator
-      def validate_each(record, attribute, value)
-        record.errors.add(attribute, 'invalid viewport') unless
-            ::Plotrb::Validators::array_of_transform?(value)
       end
     end
 
@@ -68,11 +55,6 @@ module Plotrb
       end
     end
 
-    validates :name, presence: true, length: { minimum: 1 }
-    validates :source, allow_nil: true, length: { minimum: 1 }
-    validates :url, allow_nil: true, url: true
-    validates :transform, allow_nil: true, transform: true
-    validates :format, allow_nil: true, format: true
 
   end
 
