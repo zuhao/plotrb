@@ -9,11 +9,15 @@ module Plotrb
 
     module ClassMethods
 
-      # override attr_accessor to keep track of attributes
-      def attr_accessor(*vars)
+      # add setter methods to attributes
+      def add_attributes(*vars)
         @attributes ||= []
         @attributes.concat(vars)
-        super
+        vars.each do |var|
+          define_method("#{var}=") { |value|
+            instance_variable_set("@#{var}", value)
+          }
+        end
       end
 
       def attributes
@@ -35,7 +39,7 @@ module Plotrb
     def set_attributes(args)
       args.each do |k, v|
         # use singleton_class as attributes are instance-specific
-        self.singleton_class.class_eval { attr_accessor k }
+        self.singleton_class.class_eval { add_attributes k }
         self.instance_variable_set("@#{k}", v) unless v.nil?
       end
     end
@@ -43,9 +47,7 @@ module Plotrb
     # add new attributes to the instance
     # @param args [Array<Symbol>] the attributes to add to the instance
     def add_attributes(*args)
-      args.each do |k|
-        self.singleton_class.class_eval { attr_accessor k }
-      end
+      self.singleton_class.add_attributes(*args)
     end
 
     # @return [Array<Symbol>] attributes that have values
@@ -81,7 +83,7 @@ module Plotrb
       end
     end
 
-    # monkey patch Hash class to support reverse_merge
+    # monkey patch Hash class to support reverse_merge and collect_attributes
     class ::Hash
 
       def reverse_merge(other_hash)

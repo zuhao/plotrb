@@ -6,10 +6,10 @@ describe 'Base', :broken => true do
 
     class FooClass
       include ::Plotrb::Base
-      attr_accessor :bar_bar
+      add_attributes :bar_bar
       def initialize
         self.singleton_class.class_eval do
-          attr_accessor :bar, :baz
+          add_attributes :bar, :baz
         end
       end
     end
@@ -17,7 +17,7 @@ describe 'Base', :broken => true do
     class Foo2Class < FooClass
       def initialize
         self.singleton_class.class_eval do
-          attr_accessor :bar2
+          add_attributes :bar2
         end
       end
     end
@@ -26,7 +26,7 @@ describe 'Base', :broken => true do
       include ::Plotrb::Base
       def initialize
         self.singleton_class.class_eval do
-          attr_accessor :qux
+          add_attributes :qux
         end
       end
     end
@@ -39,7 +39,7 @@ describe 'Base', :broken => true do
       foo.respond_to?(:attributes).should be_true
     end
 
-    it 'keeps track of all attributes defined via attr_accessor' do
+    it 'keeps track of all attributes defined via add_attributes' do
       foo.attributes.should match_array([:bar, :baz, :bar_bar])
     end
 
@@ -88,7 +88,7 @@ describe 'Base', :broken => true do
 
     class Foo
       include ::Plotrb::Base
-      attr_accessor :attr
+      add_attributes :attr
     end
 
     class Bar; end
