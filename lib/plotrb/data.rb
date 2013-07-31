@@ -41,7 +41,6 @@ module Plotrb
       end
     end
 
-    # TODO: parse format properly
     def format(*args, &block)
       case args.size
         when 0
@@ -100,6 +99,12 @@ module Plotrb
       end
     end
 
+    def method_missing(method, *args, &block)
+      case method.to_s
+        when /^as_(csv|tsv|json|topojson|treejson)$/ # set format of the data
+          self.format($1.to_sym, &block)
+        else
+          super
       end
     end
 
