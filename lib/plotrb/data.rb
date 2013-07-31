@@ -100,24 +100,6 @@ module Plotrb
       end
     end
 
-    class FormatValidator < ActiveModel::EachValidator
-      def validate_each(record, attribute, value)
-        record.errors.add(attribute, 'invalid format') unless
-            valid_format_key?(value) && valid_format_value?(value)
-      end
-
-      def valid_format_key?(format)
-        format.is_a?(Hash) && [:json, :csv, :tsv].include?(format[:type])
-      end
-
-      def valid_format_value?(format)
-        valid = true
-        if format[:parse]
-          format[:parse].each do |_, v|
-            valid = false unless [:number, :boolean, :date].include?(v)
-          end
-        end
-        valid
       end
     end
 
