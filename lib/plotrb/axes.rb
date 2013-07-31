@@ -42,7 +42,7 @@ module Plotrb
     #   @return [Integer] the offset from the axis at which to place the title
     # @!attribute grid
     #   @return [Boolean] whether gridlines should be created
-    attr_accessor :type, :scale, :orient, :format, :ticks, :values, :subdivide,
+    add_attributes :type, :scale, :orient, :format, :ticks, :values, :subdivide,
                   :tick_padding, :tick_size, :tick_size_major, :tick_size_minor,
                   :tick_size_end, :offset, :properties, :title, :title_offset,
                   :grid

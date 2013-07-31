@@ -47,7 +47,7 @@ module Plotrb
     # @!attributes sort
     #   @return [Boolean] whether values in the scale domain will be sorted
     #     according to their natural order
-    attr_accessor :name, :type, :domain, :domain_min, :domain_max, :range,
+    add_attributes :name, :type, :domain, :domain_min, :domain_max, :range,
                   :range_min, :range_max, :reverse, :round, :points, :clamp,
                   :nice, :exponent, :zero, :padding, :sort
 
@@ -391,7 +391,7 @@ module Plotrb
     #   @return [String] the name of a data set
     # @!attributes field
     #   @return [String] A field from which to pull a data values
-    attr_accessor :data, :field
+    add_attributes :data, :field
 
     def initialize(args={})
       args.each do |k, v|

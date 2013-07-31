@@ -26,7 +26,7 @@ module Plotrb
     #   @return [Array<Marks>] the marks for visualization
     # @!attributes axes
     #   @return [Array<Axis>] the axes for visualization
-    attr_accessor :name, :width, :height, :viewport, :padding, :data, :scales,
+    add_attributes :name, :width, :height, :viewport, :padding, :data, :scales,
                   :marks, :axes
 
     def initialize(args={})

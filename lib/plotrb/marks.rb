@@ -25,7 +25,7 @@ module Plotrb
     #   @return [ValueRef] the transition delay for mark updates
     # @!attributes ease
     #   @return [String] the transition easing function for mark updates
-    attr_accessor :type, :name, :description, :from, :properties, :key, :delay,
+    add_attributes :type, :name, :description, :from, :properties, :key, :delay,
                   :ease, :group
 
     class FromValidator < ActiveModel::EachValidator
@@ -60,7 +60,7 @@ module Plotrb
     validates :ease, allow_nil: true, ease: true
 
     # Mark property sets
-    attr_accessor :x, :x2, :width, :y, :y2, :height, :opacity, :fill,
+    add_attributes :x, :x2, :width, :y, :y2, :height, :opacity, :fill,
                   :fill_opacity, :stroke, :stroke_width, :stroke_opacity, :size,
                   :shape, :path, :inner_radius, :outer_radius, :start_angle,
                   :end_angle, :interpolate, :tension, :url, :align, :baseline,
@@ -101,7 +101,7 @@ module Plotrb
     # @!attributes band
     #   @return [Boolean] whether to use range band of the scale as the
     #     retrieved value
-    attr_accessor :value, :field, :scale, :mult, :offset, :band
+    add_attributes :value, :field, :scale, :mult, :offset, :band
 
     validates :mult, allow_nil: true, numericality: true
     validates :offset, allow_nil: true, numericality: true

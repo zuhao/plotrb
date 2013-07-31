@@ -15,7 +15,7 @@ module Plotrb
 
     # @!attributes type
     #   @return [Symbol] the transform type
-    attr_accessor :type
+    add_attributes :type
 
     def initialize(args={})
       unless args[:type].nil?

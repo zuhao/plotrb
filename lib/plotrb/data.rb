@@ -18,7 +18,7 @@ module Plotrb
     #   @return [String] the url from which to load the data set
     # @!attributes transform
     #   @return [Array<Transform>] an array of transform definitions
-    attr_accessor :name, :format, :values, :source, :url, :transform
+    add_attributes :name, :format, :values, :source, :url, :transform
 
     def initialize(args={}, &block)
       args.each do |k, v|
