@@ -47,8 +47,7 @@ module Plotrb
         when 0
           @format
         when 1
-          @format = args[0].to_sym
-          self.instance_eval(&block) if block_given?
+          @format = Format.new(args[0].to_sym, &block)
           self
         else
           raise ArgumentError
