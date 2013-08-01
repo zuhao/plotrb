@@ -39,7 +39,7 @@ module Plotrb
     def set_attributes(args)
       args.each do |k, v|
         # use singleton_class as attributes are instance-specific
-        self.singleton_class.class_eval { add_attributes k }
+        self.singleton_class.add_attributes(k)
         self.instance_variable_set("@#{k}", v) unless v.nil?
       end
     end
