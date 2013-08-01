@@ -1,74 +1,137 @@
 require_relative '../spec_helper'
 
-describe 'Base', :broken => true do
+describe 'Base' do
 
-  describe 'setting attributes for each instance' do
+  class FooClass
+    include ::Plotrb::Base
+  end
 
-    class FooClass
-      include ::Plotrb::Base
-      add_attributes :bar_bar
-      def initialize
-        self.singleton_class.class_eval do
-          add_attributes :bar, :baz
-        end
+  class BarClass
+  end
+
+  class BazClass
+  end
+
+  describe 'ClassMethods' do
+
+    let(:foo) { Class.new { include ::Plotrb::Base } }
+
+    describe '.attributes' do
+
+      it 'has attributes' do
+        foo.respond_to?(:attributes).should be_true
       end
+
     end
 
-    class Foo2Class < FooClass
-      def initialize
-        self.singleton_class.class_eval do
-          add_attributes :bar2
-        end
+    describe '.add_attributes' do
+
+      before(:each) do
+        foo.class_eval { add_attributes :foo_foo }
       end
-    end
 
-    class BarClass
-      include ::Plotrb::Base
-      def initialize
-        self.singleton_class.class_eval do
-          add_attributes :qux
-        end
+      it 'keeps track of all attributes defined for class' do
+        foo.attributes.should match_array([:foo_foo])
       end
-    end
 
-    let(:foo) { FooClass.new }
-    let(:bar) { BarClass.new }
-    let(:foo2) { Foo2Class.new }
+      it 'adds setter method for the attribute' do
+        bar = foo.new
+        bar.foo_foo = 1
+        bar.instance_variable_get(:@foo_foo).should == 1
+      end
 
-    it 'has attributes' do
-      foo.respond_to?(:attributes).should be_true
-    end
-
-    it 'keeps track of all attributes defined via add_attributes' do
-      foo.attributes.should match_array([:bar, :baz, :bar_bar])
-    end
-
-    it 'limits attributes to single instance' do
-      foo2.attributes.should_not include(:bar, :baz)
-      foo2.attributes.should include(:bar2)
-    end
-
-    it 'sets attributes' do
-      foo.set_attributes({:a => 1, :b => 2})
-      foo.a.should == 1
-      foo.b.should == 2
-    end
-
-    it 'lists all defined attributes' do
-      foo.bar_bar = 1
-      foo.baz = 2
-      foo.defined_attributes.should match_array([:bar_bar, :baz])
     end
 
   end
 
-  describe 'classifying strings' do
+  describe '#attributes' do
 
-    class Foo
-      include ::Plotrb::Base
+    let(:foo) { FooClass.new }
+    before(:each) do
+      foo.class_eval { add_attributes :foo_foo }
     end
 
-    let(:foo) { Foo.new }
+    it 'tracks both class-defined and instance-defined attributes' do
+      foo.add_attributes(:bar_bar)
+      foo.attributes.should match_array([:foo_foo, :bar_bar])
+    end
+
+  end
+
+  describe '#set_attribuets' do
+
+    let(:foo) { FooClass.new }
+
+    it 'creates attributes and sets values' do
+      foo.set_attributes(a: 1, b: 2)
+      foo.attributes.should match_array([:a, :b])
+      foo.instance_variable_get(:@a).should == 1
+      foo.instance_variable_get(:@b).should == 2
+    end
+
+  end
+
+  describe '#add_attributes' do
+
+    let(:foo) { FooClass.new }
+    let(:bar) { FooClass.new }
+    before(:each) do
+      FooClass.add_attributes(:foo_class)
+    end
+
+    it 'adds attributes to specific instance only' do
+      foo.add_attributes(:foo_foo)
+      bar.add_attributes(:bar_bar)
+      foo.attributes.should match_array([:foo_class, :foo_foo])
+      bar.attributes.should match_array([:foo_class, :bar_bar])
+    end
+
+  end
+
+  describe '#defined_attributes' do
+
+    let(:foo) { FooClass.new }
+
+    it 'only returns non-nil attributes' do
+      foo.set_attributes(a: 1, b: 2, c: nil)
+      foo.defined_attributes.should match_array([:a, :b])
+    end
+
+  end
+
+  describe '#collect_attributes' do
+
+    let(:foo) { FooClass.new }
+    let(:bar) { BarClass.new }
+    let(:baz) { BazClass.new }
+    before(:each) do
+      foo.add_attributes(:attr)
+    end
+
+    it 'recursively collects attributes' do
+      BarClass.any_instance.stub(:respond_to?).with(:collect_attributes).
+          and_return(true)
+      BarClass.any_instance.stub(:collect_attributes).and_return('bar_values')
+      foo.attr = bar
+      foo.collect_attributes.should == { 'attr' => 'bar_values' }
+    end
+
+    it 'collects attributes of each of the array element' do
+      BarClass.any_instance.stub(:respond_to?).with(:collect_attributes).
+          and_return(true)
+      BazClass.any_instance.stub(:respond_to?).with(:collect_attributes).
+          and_return(true)
+      BarClass.any_instance.stub(:collect_attributes).and_return('bar_values')
+      BazClass.any_instance.stub(:collect_attributes).and_return('baz_values')
+      foo.attr = [bar, baz]
+      foo.collect_attributes.should == { 'attr' => %w(bar_values baz_values)}
+    end
+
+  end
+
+  describe '#classify' do
+
+    let(:foo) { Class.new { extend ::Plotrb::Base } }
 
     it 'classifies string' do
       foo.classify('visualization').should == 'Visualization'
@@ -84,38 +147,36 @@ describe 'Base', :broken => true do
 
   end
 
-  describe 'collecting attributes into hash' do
+  describe 'Hash' do
 
-    class Foo
-      include ::Plotrb::Base
-      add_attributes :attr
+    describe '#reverse_merge' do
+
+      it 'should respond to reverse_merge' do
+        Hash.new.respond_to?(:reverse_merge).should be_true
+      end
+
+      it 'reverse merges hash' do
+        hash = {a: 1, b: 2}
+        default = {a:2, c:3}
+        hash.reverse_merge(default).should == {a: 1, b: 2, c: 3}
+      end
+
     end
 
-    class Bar; end
+    describe '#collect_attributes' do
 
-    class Baz; end
+      it 'should respond to collect_attributes' do
+        Hash.new.respond_to?(:collect_attributes).should be_true
+      end
 
-    let(:foo) { Foo.new }
-    let(:bar) { Bar.new }
-    let(:baz) { Baz.new }
+      it 'recursively collects attributes' do
+        hash = {foo: FooClass.new, bar: BarClass.new}
+        FooClass.any_instance.stub(:collect_attributes).and_return('foo_value')
+        BarClass.any_instance.stub(:collect_attributes).and_return('bar_value')
+        hash.collect_attributes.should == {'foo' => 'foo_value',
+                                           'bar' => 'bar_value'}
+      end
 
-    it 'recursively collects attributes' do
-      Bar.any_instance.stub(:respond_to?).with(:collect_attributes).
-          and_return(true)
-      Bar.any_instance.stub(:collect_attributes).and_return('bar_values')
-      foo.attr = bar
-      foo.collect_attributes.should == { 'attr' => 'bar_values' }
-    end
-
-    it 'collects attributes of each of the array element' do
-      Bar.any_instance.stub(:respond_to?).with(:collect_attributes).
-          and_return(true)
-      Baz.any_instance.stub(:respond_to?).with(:collect_attributes).
-          and_return(true)
-      Bar.any_instance.stub(:collect_attributes).and_return('bar_values')
-      Baz.any_instance.stub(:collect_attributes).and_return('baz_values')
-      foo.attr = [bar, baz]
-      foo.collect_attributes.should == { 'attr' => %w(bar_values baz_values)}
     end
 
   end
