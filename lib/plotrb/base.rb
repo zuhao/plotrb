@@ -93,13 +93,23 @@ module Plotrb
       def collect_attributes
         collected = {}
         self.each do |k, v|
+          json_attr = classify(k, :json)
           if v.respond_to?(:collect_attributes)
-            collected[k] = v.collect_attributes
+            collected[json_attr] = v.collect_attributes
           else
-            collected[k] = v
+            collected[json_attr] = v
           end
         end
         collected
+      end
+
+      def classify(name, format=nil)
+        klass = name.to_s.split('_').collect(&:capitalize).join
+        if format == :json
+          klass[0].downcase + klass[1..-1]
+        else
+          klass
+        end
       end
 
     end
