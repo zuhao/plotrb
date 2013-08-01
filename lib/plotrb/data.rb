@@ -199,16 +199,19 @@ module Plotrb
         parse(field => :date, &block)
         self
       end
+      alias_method :as_date, date
 
       def number(field, &block)
         parse(field => :number, &block)
         self
       end
+      alias_method :as_number, :number
 
       def boolean(field, &block)
         parse(field => :boolean, &block)
         self
       end
+      alias_method :as_boolean, :boolean
 
       def property(*args, &block)
         raise NoMethodError unless self.attributes.include?(:property)
