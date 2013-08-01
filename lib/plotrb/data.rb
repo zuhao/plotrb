@@ -199,7 +199,7 @@ module Plotrb
         parse(field => :date, &block)
         self
       end
-      alias_method :as_date, date
+      alias_method :as_date, :date
 
       def number(field, &block)
         parse(field => :number, &block)
