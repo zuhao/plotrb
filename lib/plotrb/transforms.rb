@@ -6,8 +6,6 @@ module Plotrb
   class Transform
 
     include ::Plotrb::Base
-    include ::Plotrb::Validators
-    include ActiveModel::Validations
 
     # all available types of transforms defined by Vega
     TYPES = %i(array copy filter flatten formula sort stats unique zip force geo
