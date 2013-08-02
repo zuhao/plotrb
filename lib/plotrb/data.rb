@@ -57,8 +57,12 @@ module Plotrb
       case args.size
         when 0
           @values
+        when 1
+          @values = parse_values(args[0])
+          self.instance_eval(&block) if block_given?
+          self
         else
-          @values = args
+          raise ArgumentError
       end
     end
 
@@ -137,6 +141,19 @@ module Plotrb
     def parse_url(url)
       url if URI.parse(url)
     rescue URI::InvalidURIError
+      raise ArgumentError
+    end
+
+    def parse_values(values)
+      case values
+        when String
+          values if Yajl::Parser.parse(values)
+        when Array, Hash
+          values
+        else
+          raise ArgumentError
+      end
+    rescue Yajl::ParseError
       raise ArgumentError
     end
 
