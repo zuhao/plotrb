@@ -91,6 +91,7 @@ module Plotrb
           raise ArgumentError
       end
     end
+    alias_method :file, :url
 
     def transform(*args, &block)
       case args.size
