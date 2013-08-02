@@ -118,11 +118,9 @@ module Plotrb
     def parse_transform(transform)
       case transform
         when Array
-          transform.collect { |t| parse_transform(t) }
-        when String
-          transform
+          transform.collect { |t| parse_transform(t) }.flatten
         when ::Plotrb::Transform
-          transform.name
+          transform
         else
           raise ArgumentError
       end
