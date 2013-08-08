@@ -154,6 +154,11 @@ describe 'Data' do
           subject.parse['foo'].should == :date
         end
 
+        it 'allows setting multiple fields' do
+          subject.as_date('foo', 'bar')
+          subject.parse.should == {'foo' => :date, 'bar' => :date}
+        end
+
       end
 
       describe '#as_boolean' do
