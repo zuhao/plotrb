@@ -211,20 +211,23 @@ module Plotrb
         end
       end
 
-      def date(field, &block)
-        parse(field => :date, &block)
+      def date(*field, &block)
+        field.flatten.each { |f| parse(f => :date) }
+        self.instance_eval(&block) if block_given?
         self
       end
       alias_method :as_date, :date
 
-      def number(field, &block)
-        parse(field => :number, &block)
+      def number(*field, &block)
+        field.flatten.each { |f| parse(f => :number) }
+        self.instance_eval(&block) if block_given?
         self
       end
       alias_method :as_number, :number
 
-      def boolean(field, &block)
-        parse(field => :boolean, &block)
+      def boolean(*field, &block)
+        field.flatten.each { |f| parse(f => :boolean) }
+        self.instance_eval(&block) if block_given?
         self
       end
       alias_method :as_boolean, :boolean
