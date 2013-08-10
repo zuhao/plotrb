@@ -92,7 +92,7 @@ describe 'Data' do
 
     class Bar; end
 
-    let(:foo) { ::Plotrb::Transform.new }
+    let(:foo) { ::Plotrb::Transform.new(:array) }
     let(:bar) { Bar.new }
 
     it 'sets transform if a transform object is given' do
