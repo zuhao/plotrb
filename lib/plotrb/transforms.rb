@@ -7,22 +7,14 @@ module Plotrb
 
     include ::Plotrb::Base
 
-    # all available types of transforms defined by Vega
-    TYPES = %i(array copy filter flatten formula sort stats unique zip force geo
-               geopath link pie stack treemap wordcloud)
-
     # @!attributes type
     #   @return [Symbol] the transform type
     add_attributes :type
 
     def initialize(type, &block)
-      if TYPES.include?(type)
-        @type = type
-        self.send(@type)
-        self.instance_eval(&block) if block_given?
-      else
-        raise ArgumentError
-      end
+      @type = type
+      self.send(@type)
+      self.instance_eval(&block) if block_given?
     end
 
     def type(*args, &block)
@@ -57,6 +49,13 @@ module Plotrb
       add_attributes(:from, :fields, :as)
     end
 
+    def cross
+      # @!attributes with
+      #   @return [String] the name of the secondary data to cross with
+      # @!attributes diagonal
+      #   @return [Boolean] whether diagonal of cross-product will be included
+      add_attributes(:with, :diagonal)
+    end
 
     def facet
       # @!attributes keys
@@ -65,7 +64,6 @@ module Plotrb
       #   @return [String, Array<String>] sort criteria
       add_attributes(:keys, :sort)
     end
-
 
     def filter
       # @!attributes test
@@ -77,6 +75,12 @@ module Plotrb
     # no parameter needed
     def flatten; end
 
+    def fold
+      # @!attributes fields
+      #   @return [Array<String>] the field references indicating the data
+      #     properties to fold
+      add_attributes(:fields)
+    end
 
     def formula
       # @!attributes field
@@ -86,6 +90,13 @@ module Plotrb
       add_attributes(:field, :expr)
     end
 
+    def slice
+      # @!attributes by
+      #   @return [Integer, Array<Integer>, Symbol] the sub-array to copy
+      # @!attributes field
+      #   @return [String] the data field to copy the max, min or median value
+      add_attributes(:by, :field)
+    end
 
     def sort
       # @!attributes by
@@ -93,7 +104,6 @@ module Plotrb
       #     criteria
       add_attributes(:by)
     end
-
 
     def stats
       # @!attributes value
@@ -103,6 +113,21 @@ module Plotrb
       add_attributes(:value, :median)
     end
 
+    def truncate
+      # @!attributes value
+      #   @return [String] the field containing values to truncate
+      # @!attributes output
+      #   @return [String] the field to store the truncated values
+      # @!attributes limit
+      #   @return [Integer] maximum length of truncated string
+      # @!attributes position
+      #   @return [Symbol] the position from which to remove text
+      # @!attributes ellipsis
+      #   @return [String] the ellipsis for truncated text
+      # @!attributes wordbreak
+      #   @return [Boolean] whether to truncate along word boundaries
+      add_attributes(:value, :output, :limit, :position, :ellipsis, :wordbreak)
+    end
 
     def unique
       # @!attributes field
@@ -112,6 +137,13 @@ module Plotrb
       add_attributes(:field, :as)
     end
 
+    def window
+      # @!attributes size
+      #   @return [Integer] the size of the sliding window
+      # @!attributes step
+      #   @return [Integer] the step size to advance the window per frame
+      add_attributes(:size, :step)
+    end
 
     def zip
       # @!attributes with
@@ -132,7 +164,6 @@ module Plotrb
     end
 
     # Visual Encoding Transforms
-
 
     def force
       # @!attributes links
@@ -164,7 +195,6 @@ module Plotrb
                      :link_strength, :friction, :theta, :gravity, :alpha)
     end
 
-
     def geo
       # @!attributes projection
       #   @return [String] the type of cartographic projection to use
@@ -188,7 +218,6 @@ module Plotrb
                      :rotate, :precision, :clip_angle)
     end
 
-
     def geopath
       # @!attributes field
       #   @return [String] the data field containing the GeoJSON feature data
@@ -196,7 +225,6 @@ module Plotrb
       add_attributes(:field, :projection, :center, :translate, :scale, :rotate,
                      :precision, :clip_angle)
     end
-
 
     def link
       # @!attributes source
@@ -213,7 +241,6 @@ module Plotrb
       add_attributes(:source, :target, :shape, :tension)
     end
 
-
     def pie
       # @!attributes sort
       #   @return [Boolean] whether to sort the data prior to computing angles
@@ -221,7 +248,6 @@ module Plotrb
       #   @return [String] the data values to encode as angular spans
       add_attributes(:sort, :value)
     end
-
 
     def stack
       # @!attributes point
@@ -235,7 +261,6 @@ module Plotrb
       #   @return [Symbol] the sort order for stack layers
       add_attributes(:point, :height, :offset, :order)
     end
-
 
     def treemap
       # @!attributes padding
@@ -256,7 +281,6 @@ module Plotrb
       #     leaf-level treemap cell
       add_attributes(:padding, :ratio, :round, :size, :sticky, :value)
     end
-
 
     def wordcloud
       # @!attributes font
