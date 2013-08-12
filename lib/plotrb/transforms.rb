@@ -37,6 +37,17 @@ module Plotrb
       # @!attributes fields
       #   @return [Array<String>] array of field references to copy
       add_attributes(:fields)
+      define_singleton_method :fields do |*args, &block|
+        case args.size
+          when 0
+            @fields
+          else
+            @fields = [args].flatten
+            self.instance_eval(&block) if block
+            self
+        end
+      end
+      self.class_eval { alias_method :take, :fields }
     end
 
     def copy
@@ -47,6 +58,48 @@ module Plotrb
       # @!attributes as
       #   @return [Array<String>] the field names to copy the values to
       add_attributes(:from, :fields, :as)
+      define_singleton_method :from do |*args, &block|
+        case args.size
+          when 0
+            @from
+          when 1
+            case args[0]
+              when String
+                @from = args[0]
+              when ::Plotrb::Data
+                @from = args[0].name
+              else
+                raise ArgumentError
+            end
+            self.instance_eval(&block) if block
+            self
+          else
+            raise ArgumentError
+        end
+      end
+
+      define_singleton_method :fields do |*args, &block|
+        case args.size
+          when 0
+            @fields
+          else
+            @fields = [args].flatten
+            self.instance_eval(&block) if block
+            self
+        end
+      end
+      self.class_eval { alias_method :take, :fields }
+
+      define_singleton_method :as do |*args, &block|
+        case args.size
+          when 0
+            @as
+          else
+            @as = [args].flatten
+            self.instance_eval(&block) if block
+            self
+        end
+      end
     end
 
     def cross
@@ -55,6 +108,36 @@ module Plotrb
       # @!attributes diagonal
       #   @return [Boolean] whether diagonal of cross-product will be included
       add_attributes(:with, :diagonal)
+      define_singleton_method :with do |*args, &block|
+        case args.size
+          when 0
+            @with
+          when 1
+            case args[0]
+              when String
+                @with = args[0]
+              when ::Plotrb::Data
+                @with = args[0].name
+              else
+                raise ArgumentError
+            end
+            self.instance_eval(&block) if block
+            self
+          else
+            raise ArgumentError
+        end
+      end
+
+      define_singleton_method :diagonal do |&block|
+        @diagonal = true
+        self.instance_eval(&block) if block
+        self
+      end
+      define_singleton_method :diagonal? do
+        @diagonal
+      end
+      self.class_eval { alias_method :include_diagonal, :diagonal }
+      self.class_eval { alias_method :include_diagonal?, :diagonal? }
     end
 
     def facet
@@ -63,6 +146,28 @@ module Plotrb
       # @!attributes sort
       #   @return [String, Array<String>] sort criteria
       add_attributes(:keys, :sort)
+      define_singleton_method :keys do |*args, &block|
+        case args.size
+          when 0
+            @keys
+          else
+            @keys = [args].flatten
+            self.instance_eval(&block) if block
+            self
+        end
+      end
+      self.class_eval { alias_method :group_by, :keys }
+
+      define_singleton_method :sort do |*args, &block|
+        case args.size
+          when 0
+            @sort
+          else
+            @sort = [args].flatten
+            self.instance_eval(&block) if block
+            self
+        end
+      end
     end
 
     def filter
@@ -70,16 +175,41 @@ module Plotrb
       #   @return [String] the expression for the filter predicate, which
       #     includes the variable `d`, corresponding to the current data object
       add_attributes(:test)
+      define_singleton_method :test do |*args, &block|
+        case args.size
+          when 0
+            @test
+          when 1
+            # TODO: validate test expression
+            @test = args[0]
+            self.instance_eval(&block) if block
+            self
+          else
+            raise ArgumentError
+        end
+      end
     end
 
-    # no parameter needed
-    def flatten; end
+    def flatten
+      # no parameter needed
+    end
 
     def fold
       # @!attributes fields
       #   @return [Array<String>] the field references indicating the data
       #     properties to fold
       add_attributes(:fields)
+      define_singleton_method :fields do |*args, &block|
+        case args.size
+          when 0
+            @fields
+          else
+            @fields = [args].flatten
+            self.instance_eval(&block) if block
+            self
+        end
+      end
+      self.class_eval { alias_method :into, :fields }
     end
 
     def formula
@@ -88,6 +218,34 @@ module Plotrb
       # @!attributes
       #   @return expr [String] the expression for the formula
       add_attributes(:field, :expr)
+      define_singleton_method :field do |*args, &block|
+        case args.size
+          when 0
+            @field
+          when 1
+            @field = args[0]
+            self.instance_eval(&block) if block
+            self
+          else
+            raise ArgumentError
+        end
+      end
+      self.class_eval { alias_method :into, :field }
+
+      define_singleton_method :expr do |*args, &block|
+        case args.size
+          when 0
+            @expr
+          when 1
+            # TODO: validate expression
+            @expr = args[0]
+            self.instance_eval(&block) if block
+            self
+          else
+            raise ArgumentError
+        end
+      end
+      self.class_eval { alias_method :apply, :expr }
     end
 
     def slice
@@ -96,6 +254,38 @@ module Plotrb
       # @!attributes field
       #   @return [String] the data field to copy the max, min or median value
       add_attributes(:by, :field)
+      define_singleton_method :by do |*args, &block|
+        case args.size
+          when 0
+            @by
+          when 1
+            case args[0]
+              when Integer, Array
+                @by = args[0]
+              when :min, :max, :median
+                @by = args[0]
+              else
+                raise ArgumentError
+            end
+            self.instance_eval(&block) if block
+            self
+          else
+            raise ArgumentError
+        end
+      end
+
+      define_singleton_method :field do |*args, &block|
+        case args.size
+          when 0
+            @field
+          when 1
+            @field = args[0]
+            self.instance_eval(&block) if block
+            self
+          else
+            raise ArgumentError
+        end
+      end
     end
 
     def sort
@@ -103,6 +293,16 @@ module Plotrb
       #   @return [String, Array<String>] a list of fields to use as sort
       #     criteria
       add_attributes(:by)
+      define_singleton_method :by do |*args, &block|
+        case args.size
+          when 0
+            @by
+          else
+            @by = [args].flatten
+            self.instance_eval(&block) if block
+            self
+        end
+      end
     end
 
     def stats
@@ -110,7 +310,44 @@ module Plotrb
       #   @return [String] the field for which to computer the statistics
       # @!attributes median
       #   @return [Boolean] whether median will be computed
-      add_attributes(:value, :median)
+      # @!attributes assign
+      #   @return [Boolean] whether add stat property to each data element
+      add_attributes(:value, :median, :assign)
+      define_singleton_method :value do |*args, &block|
+        case args.size
+          when 0
+            @value
+          when 1
+            @value = args[0]
+            self.instance_eval(&block) if block
+            self
+          else
+            raise ArgumentError
+        end
+      end
+      self.class_eval { alias_method :from, :value }
+
+      define_singleton_method :median do |&block|
+        @median = true
+        self.instance_eval(&block) if block
+        self
+      end
+      define_singleton_method :median? do
+        @median
+      end
+      self.class_eval { alias_method :include_median, :median }
+      self.class_eval { alias_method :include_median?, :median? }
+
+      define_singleton_method :assign do |&block|
+        @assign = true
+        self.instance_eval(&block) if block
+        self
+      end
+      define_singleton_method :assign? do
+        @assign
+      end
+      self.class_eval { alias_method :store_stats, :assign }
+      self.class_eval { alias_method :store_stats?, :assign? }
     end
 
     def truncate
