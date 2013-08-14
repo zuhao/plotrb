@@ -37,16 +37,7 @@ module Plotrb
       # @!attributes fields
       #   @return [Array<String>] array of field references to copy
       add_attributes(:fields)
-      define_singleton_method :fields do |*args, &block|
-        case args.size
-          when 0
-            @fields
-          else
-            @fields = [args].flatten
-            self.instance_eval(&block) if block
-            self
-        end
-      end
+      define_attribute_method(:fields, multiple_values:true)
       self.class_eval { alias_method :take, :fields }
     end
 
@@ -58,48 +49,10 @@ module Plotrb
       # @!attributes as
       #   @return [Array<String>] the field names to copy the values to
       add_attributes(:from, :fields, :as)
-      define_singleton_method :from do |*args, &block|
-        case args.size
-          when 0
-            @from
-          when 1
-            case args[0]
-              when String
-                @from = args[0]
-              when ::Plotrb::Data
-                @from = args[0].name
-              else
-                raise ArgumentError
-            end
-            self.instance_eval(&block) if block
-            self
-          else
-            raise ArgumentError
-        end
-      end
-
-      define_singleton_method :fields do |*args, &block|
-        case args.size
-          when 0
-            @fields
-          else
-            @fields = [args].flatten
-            self.instance_eval(&block) if block
-            self
-        end
-      end
+      define_attribute_method(:from)
+      define_attribute_method(:fields, multiple_values:true)
+      define_attribute_method(:as, multiple_values:true)
       self.class_eval { alias_method :take, :fields }
-
-      define_singleton_method :as do |*args, &block|
-        case args.size
-          when 0
-            @as
-          else
-            @as = [args].flatten
-            self.instance_eval(&block) if block
-            self
-        end
-      end
     end
 
     def cross
@@ -108,34 +61,8 @@ module Plotrb
       # @!attributes diagonal
       #   @return [Boolean] whether diagonal of cross-product will be included
       add_attributes(:with, :diagonal)
-      define_singleton_method :with do |*args, &block|
-        case args.size
-          when 0
-            @with
-          when 1
-            case args[0]
-              when String
-                @with = args[0]
-              when ::Plotrb::Data
-                @with = args[0].name
-              else
-                raise ArgumentError
-            end
-            self.instance_eval(&block) if block
-            self
-          else
-            raise ArgumentError
-        end
-      end
-
-      define_singleton_method :diagonal do |&block|
-        @diagonal = true
-        self.instance_eval(&block) if block
-        self
-      end
-      define_singleton_method :diagonal? do
-        @diagonal
-      end
+      define_attribute_method(:with)
+      define_attribute_method(:diagonal, boolean:true)
       self.class_eval { alias_method :include_diagonal, :diagonal }
       self.class_eval { alias_method :include_diagonal?, :diagonal? }
     end
@@ -146,28 +73,9 @@ module Plotrb
       # @!attributes sort
       #   @return [String, Array<String>] sort criteria
       add_attributes(:keys, :sort)
-      define_singleton_method :keys do |*args, &block|
-        case args.size
-          when 0
-            @keys
-          else
-            @keys = [args].flatten
-            self.instance_eval(&block) if block
-            self
-        end
-      end
+      define_attribute_method(:keys, multiple_values:true)
+      define_attribute_method(:sort, multiple_values:true)
       self.class_eval { alias_method :group_by, :keys }
-
-      define_singleton_method :sort do |*args, &block|
-        case args.size
-          when 0
-            @sort
-          else
-            @sort = [args].flatten
-            self.instance_eval(&block) if block
-            self
-        end
-      end
     end
 
     def filter
@@ -175,19 +83,7 @@ module Plotrb
       #   @return [String] the expression for the filter predicate, which
       #     includes the variable `d`, corresponding to the current data object
       add_attributes(:test)
-      define_singleton_method :test do |*args, &block|
-        case args.size
-          when 0
-            @test
-          when 1
-            # TODO: validate test expression
-            @test = args[0]
-            self.instance_eval(&block) if block
-            self
-          else
-            raise ArgumentError
-        end
-      end
+      define_attribute_method(:test)
     end
 
     def flatten
@@ -199,16 +95,7 @@ module Plotrb
       #   @return [Array<String>] the field references indicating the data
       #     properties to fold
       add_attributes(:fields)
-      define_singleton_method :fields do |*args, &block|
-        case args.size
-          when 0
-            @fields
-          else
-            @fields = [args].flatten
-            self.instance_eval(&block) if block
-            self
-        end
-      end
+      define_attribute_method(:fields, multiple_values:true)
       self.class_eval { alias_method :into, :fields }
     end
 
@@ -218,33 +105,9 @@ module Plotrb
       # @!attributes
       #   @return expr [String] the expression for the formula
       add_attributes(:field, :expr)
-      define_singleton_method :field do |*args, &block|
-        case args.size
-          when 0
-            @field
-          when 1
-            @field = args[0]
-            self.instance_eval(&block) if block
-            self
-          else
-            raise ArgumentError
-        end
-      end
+      define_attribute_method(:field)
+      define_attribute_method(:expr)
       self.class_eval { alias_method :into, :field }
-
-      define_singleton_method :expr do |*args, &block|
-        case args.size
-          when 0
-            @expr
-          when 1
-            # TODO: validate expression
-            @expr = args[0]
-            self.instance_eval(&block) if block
-            self
-          else
-            raise ArgumentError
-        end
-      end
       self.class_eval { alias_method :apply, :expr }
     end
 
@@ -254,38 +117,8 @@ module Plotrb
       # @!attributes field
       #   @return [String] the data field to copy the max, min or median value
       add_attributes(:by, :field)
-      define_singleton_method :by do |*args, &block|
-        case args.size
-          when 0
-            @by
-          when 1
-            case args[0]
-              when Integer, Array
-                @by = args[0]
-              when :min, :max, :median
-                @by = args[0]
-              else
-                raise ArgumentError
-            end
-            self.instance_eval(&block) if block
-            self
-          else
-            raise ArgumentError
-        end
-      end
-
-      define_singleton_method :field do |*args, &block|
-        case args.size
-          when 0
-            @field
-          when 1
-            @field = args[0]
-            self.instance_eval(&block) if block
-            self
-          else
-            raise ArgumentError
-        end
-      end
+      define_attribute_method(:by)
+      define_attribute_method(:field)
     end
 
     def sort
@@ -293,16 +126,7 @@ module Plotrb
       #   @return [String, Array<String>] a list of fields to use as sort
       #     criteria
       add_attributes(:by)
-      define_singleton_method :by do |*args, &block|
-        case args.size
-          when 0
-            @by
-          else
-            @by = [args].flatten
-            self.instance_eval(&block) if block
-            self
-        end
-      end
+      define_attribute_method(:by, multiple_values:true)
     end
 
     def stats
@@ -313,39 +137,12 @@ module Plotrb
       # @!attributes assign
       #   @return [Boolean] whether add stat property to each data element
       add_attributes(:value, :median, :assign)
-      define_singleton_method :value do |*args, &block|
-        case args.size
-          when 0
-            @value
-          when 1
-            @value = args[0]
-            self.instance_eval(&block) if block
-            self
-          else
-            raise ArgumentError
-        end
-      end
+      define_attribute_method(:value)
+      define_attribute_method(:median, boolean:true)
+      define_attribute_method(:assign, boolean:true)
       self.class_eval { alias_method :from, :value }
-
-      define_singleton_method :median do |&block|
-        @median = true
-        self.instance_eval(&block) if block
-        self
-      end
-      define_singleton_method :median? do
-        @median
-      end
       self.class_eval { alias_method :include_median, :median }
       self.class_eval { alias_method :include_median?, :median? }
-
-      define_singleton_method :assign do |&block|
-        @assign = true
-        self.instance_eval(&block) if block
-        self
-      end
-      define_singleton_method :assign? do
-        @assign
-      end
       self.class_eval { alias_method :store_stats, :assign }
       self.class_eval { alias_method :store_stats?, :assign? }
     end
@@ -364,6 +161,22 @@ module Plotrb
       # @!attributes wordbreak
       #   @return [Boolean] whether to truncate along word boundaries
       add_attributes(:value, :output, :limit, :position, :ellipsis, :wordbreak)
+      define_attribute_method(:value)
+      define_attribute_method(:output)
+      define_attribute_method(:limit)
+      define_attribute_method(:position)
+      define_attribute_method(:ellipsis)
+      define_attribute_method(:wordbreak, boolean:true)
+      self.class_eval { alias_method :from, :value }
+      self.class_eval { alias_method :to, :output }
+      self.class_eval { alias_method :max_length, :limit }
+      define_singleton_method :method_missing do |method, *args, &block|
+        if method.to_s =~ /^in_(front|back|middle)$/
+          self.position($1.to_sym, &block)
+        else
+          super
+        end
+      end
     end
 
     def unique
@@ -372,6 +185,10 @@ module Plotrb
       # @!attributes as
       #   @return [String] the field name to store the unique values
       add_attributes(:field, :as)
+      define_attribute_method(:field)
+      define_attribute_method(:as)
+      self.class_eval { alias_method :from, :field }
+      self.class_eval { alias_method :to, :as }
     end
 
     def window
@@ -380,6 +197,8 @@ module Plotrb
       # @!attributes step
       #   @return [Integer] the step size to advance the window per frame
       add_attributes(:size, :step)
+      define_attribute_method(:size)
+      define_attribute_method(:step)
     end
 
     def zip
@@ -398,6 +217,13 @@ module Plotrb
       # @!attributes default
       #   @return [] a default value to use if no matching key value is found
       add_attributes(:with, :as, :key, :with_key, :default)
+      define_attribute_method(:with)
+      define_attribute_method(:as)
+      define_attribute_method(:key)
+      define_attribute_method(:with_key)
+      define_attribute_method(:default)
+      self.class_eval { alias_method :match, :key}
+      self.class_eval { alias_method :against, :with_key}
     end
 
     # Visual Encoding Transforms
@@ -430,6 +256,16 @@ module Plotrb
       #     node positions are adjusted at each step
       add_attributes(:links, :size, :iterations, :charge, :link_distance,
                      :link_strength, :friction, :theta, :gravity, :alpha)
+      define_attribute_method(:links)
+      define_attribute_method(:size)
+      define_attribute_method(:iterations)
+      define_attribute_method(:charge)
+      define_attribute_method(:link_distance)
+      define_attribute_method(:link_strength)
+      define_attribute_method(:friction)
+      define_attribute_method(:theta)
+      define_attribute_method(:gravity)
+      define_attribute_method(:alpha)
     end
 
     def geo
@@ -453,6 +289,15 @@ module Plotrb
       #   @return [Numeric] the clip angle of the projection
       add_attributes(:projection, :lon, :lat, :center, :translate, :scale,
                      :rotate, :precision, :clip_angle)
+      define_attribute_method(:projection)
+      define_attribute_method(:lon)
+      define_attribute_method(:lat)
+      define_attribute_method(:center)
+      define_attribute_method(:translate)
+      define_attribute_method(:scale)
+      define_attribute_method(:rotate)
+      define_attribute_method(:precision)
+      define_attribute_method(:clip_angle)
     end
 
     def geopath
@@ -461,6 +306,14 @@ module Plotrb
       # @!attributes (see #geo)
       add_attributes(:field, :projection, :center, :translate, :scale, :rotate,
                      :precision, :clip_angle)
+      define_attribute_method(:field)
+      define_attribute_method(:projection)
+      define_attribute_method(:center)
+      define_attribute_method(:translate)
+      define_attribute_method(:scale)
+      define_attribute_method(:rotate)
+      define_attribute_method(:precision)
+      define_attribute_method(:clip_angle)
     end
 
     def link
@@ -476,6 +329,10 @@ module Plotrb
       #   @return [Numeric] the tension in the range [0,1] for the "tightness"
       #     of 'curve'-shaped links
       add_attributes(:source, :target, :shape, :tension)
+      define_attribute_method(:source)
+      define_attribute_method(:target)
+      define_attribute_method(:shape)
+      define_attribute_method(:tension)
     end
 
     def pie
@@ -484,6 +341,8 @@ module Plotrb
       # @!attributes value
       #   @return [String] the data values to encode as angular spans
       add_attributes(:sort, :value)
+      define_attribute_method(:sort, boolean:true)
+      define_attribute_method(:value)
     end
 
     def stack
@@ -497,6 +356,10 @@ module Plotrb
       # @!attributes order
       #   @return [Symbol] the sort order for stack layers
       add_attributes(:point, :height, :offset, :order)
+      define_attribute_method(:point)
+      define_attribute_method(:height)
+      define_attribute_method(:offset)
+      define_attribute_method(:order)
     end
 
     def treemap
@@ -517,6 +380,12 @@ module Plotrb
       #   @return [String] the values to use to determine the area of each
       #     leaf-level treemap cell
       add_attributes(:padding, :ratio, :round, :size, :sticky, :value)
+      define_attribute_method(:padding)
+      define_attribute_method(:ratio)
+      define_attribute_method(:round, boolean:true)
+      define_attribute_method(:size)
+      define_attribute_method(:sticky, boolean:true)
+      define_attribute_method(:value)
     end
 
     def wordcloud
@@ -537,8 +406,16 @@ module Plotrb
       #   @return [Array(Integer, Integer)] the dimensions of the layout
       # @!attributes text
       #   @return [String] the data field containing the text to visualize
-      add_attributes(:font, :fontSize, :fontStyle, :fontWeight, :padding,
+      add_attributes(:font, :font_size, :font_style, :font_weight, :padding,
                      :rotate, :size, :text)
+      define_attribute_method(:font)
+      define_attribute_method(:font_size)
+      define_attribute_method(:font_style)
+      define_attribute_method(:font_weight)
+      define_attribute_method(:padding)
+      define_attribute_method(:rotate)
+      define_attribute_method(:size)
+      define_attribute_method(:text)
     end
 
   end
