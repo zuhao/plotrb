@@ -41,6 +41,10 @@ module Plotrb
       end
     end
 
+    def to_s
+      @name
+    end
+
     def format(*args, &block)
       case args.size
         when 0

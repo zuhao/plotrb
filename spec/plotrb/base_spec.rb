@@ -127,6 +127,8 @@ describe 'Base' do
       foo.collect_attributes.should == { 'attr' => %w(bar_values baz_values)}
     end
 
+    it 'collects name reference if an object in given'
+
   end
 
   describe '#define_attribute_method' do

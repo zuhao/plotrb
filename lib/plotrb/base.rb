@@ -66,9 +66,10 @@ module Plotrb
           collected[json_attr] = value.collect_attributes
         elsif value.is_a?(Array)
           collected[json_attr] = [].concat(value.collect{ |v|
-            v.respond_to?(:collect_attributes) ? v.collect_attributes : v })
+            v.respond_to?(:collect_attributes) ? v.collect_attributes : v.to_s
+          })
         else
-          collected[json_attr] = value
+          collected[json_attr] = value.to_s
         end
       end
       collected
@@ -145,7 +146,7 @@ module Plotrb
           if v.respond_to?(:collect_attributes)
             collected[json_attr] = v.collect_attributes
           else
-            collected[json_attr] = v
+            collected[json_attr] = v.to_s
           end
         end
         collected
