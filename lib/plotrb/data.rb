@@ -184,18 +184,6 @@ module Plotrb
         self
       end
 
-      def format(*args, &block)
-        case args.size
-          when 0
-            @format
-          when 1
-            initialize(args[0], &block)
-            self
-          else
-            raise ArgumentError
-        end
-      end
-
       def parse(*args, &block)
         case args.size
           when 0
