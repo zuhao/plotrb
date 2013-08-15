@@ -17,16 +17,8 @@ module Plotrb
       self.instance_eval(&block) if block_given?
     end
 
-    def type(*args, &block)
-      case args.size
-        when 0
-          @type
-        when 1
-          initialize(args[0], &block)
-          self
-        else
-          raise ArgumentError
-      end
+    def type
+      @type
     end
 
   private
