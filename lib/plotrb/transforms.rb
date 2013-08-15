@@ -113,6 +113,7 @@ module Plotrb
       define_attribute_method(:field)
     end
 
+    # TODO: allow reverse sort
     def sort
       # @!attributes by
       #   @return [String, Array<String>] a list of fields to use as sort
