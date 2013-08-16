@@ -7,6 +7,17 @@ module Plotrb
 
     include ::Plotrb::Base
 
+    # all available types of transforms defined by Vega
+    TYPES = %i(array copy cross facet filter flatten fold formula slice sort
+               stats truncate unique window zip force geo geopath link pie stack
+               treemap wordcloud)
+
+    TYPES.each do |t|
+      define_singleton_method(t) do |&block|
+        ::Plotrb::Transform.new(t, &block)
+      end
+    end
+
     # @!attributes type
     #   @return [Symbol] the transform type
     add_attributes :type
