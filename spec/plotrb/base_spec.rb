@@ -131,91 +131,87 @@ describe 'Base' do
 
   end
 
-  describe '#define_attribute_method' do
+  describe '#define_boolean_attribute' do
 
     let(:foo) { FooClass.new }
 
-    context 'when setting boolean value for the attribute' do
-
-      before(:each) do
-        foo.define_attribute_method(:bar, boolean:true)
-      end
-
-      it 'creates setter' do
-        foo.respond_to?(:bar).should be_true
-      end
-
-      it 'sets attribute to true when called' do
-        foo.bar
-        foo.instance_variable_get('@bar').should == true
-      end
-
-      it 'creates getter' do
-        foo.respond_to?(:bar?).should be_true
-      end
-
+    before(:each) do
+      foo.define_boolean_attribute(:bar)
     end
 
-    context 'when setting non-boolean value for the attribute' do
+    it 'creates setter' do
+      foo.respond_to?(:bar).should be_true
+    end
 
-      context 'when attribute takes only single value' do
+    it 'sets attribute to true when called' do
+      foo.bar
+      foo.instance_variable_get('@bar').should == true
+    end
 
-        before(:each) do
-          foo.define_attribute_method(:bar, multiple_values:false)
-        end
+    it 'creates getter' do
+      foo.respond_to?(:bar?).should be_true
+    end
 
-        it 'creates setter and getter' do
-          foo.respond_to?(:bar).should be_true
-        end
+  end
 
-        it 'acts as getter when no argument is provided' do
-          foo.should_receive(:instance_variable_get).with('@bar')
-          foo.bar
-        end
+  describe '#define_single_val_attribute' do
 
-        it 'sets value of the attribute if provided' do
-          foo.should_receive(:instance_variable_set).with('@bar', 1)
-          foo.bar(1)
-        end
+    let(:foo) { FooClass.new }
 
-        it 'raises error if more than one value is given' do
-          expect { foo.bar(1,2,3) }.to raise_error(ArgumentError)
-        end
+    before(:each) do
+      foo.define_single_val_attribute(:bar)
+    end
 
-      end
+    it 'creates setter and getter' do
+      foo.respond_to?(:bar).should be_true
+    end
 
-      context 'when attribute allows multiple values' do
+    it 'acts as getter when no argument is provided' do
+      foo.should_receive(:instance_variable_get).with('@bar')
+      foo.bar
+    end
 
-        before(:each) do
-          foo.define_attribute_method(:bar, multiple_values:true)
-        end
+    it 'sets value of the attribute if provided' do
+      foo.should_receive(:instance_variable_set).with('@bar', 1)
+      foo.bar(1)
+    end
 
-        it 'creates setter and getter' do
-          foo.respond_to?(:bar).should be_true
-        end
+    it 'raises error if more than one value is given' do
+      expect { foo.bar(1,2,3) }.to raise_error(ArgumentError)
+    end
 
-        it 'acts as getter when no argument is provided' do
-          foo.should_receive(:instance_variable_get).with('@bar')
-          foo.bar
-        end
+  end
 
-        it 'sets single value of the attribute if provided' do
-          foo.should_receive(:instance_variable_set).with('@bar', [1])
-          foo.bar(1)
-        end
+  describe '#define_multi_val_attribute' do
 
-        it 'sets array of values' do
-          foo.should_receive(:instance_variable_set).with('@bar', [1, 2, 3])
-          foo.bar([1, 2, 3])
-        end
+    let(:foo) { FooClass.new }
 
-        it 'sets multiple values' do
-          foo.should_receive(:instance_variable_set).with('@bar', [1, 2, 3])
-          foo.bar(1,2,3)
-        end
+    before(:each) do
+      foo.define_multi_val_attribute(:bar)
+    end
 
-      end
+    it 'creates setter and getter' do
+      foo.respond_to?(:bar).should be_true
+    end
 
+    it 'acts as getter when no argument is provided' do
+      foo.should_receive(:instance_variable_get).with('@bar')
+      foo.bar
+    end
+
+    it 'sets single value of the attribute if provided' do
+      foo.should_receive(:instance_variable_set).with('@bar', [1])
+      foo.bar(1)
+    end
+
+    it 'sets array of values' do
+      foo.should_receive(:instance_variable_set).with('@bar', [1, 2, 3])
+      foo.bar([1, 2, 3])
+    end
+
+    it 'sets multiple values' do
+      foo.should_receive(:instance_variable_set).with('@bar', [1, 2, 3])
+      foo.bar(1,2,3)
     end
 
   end
