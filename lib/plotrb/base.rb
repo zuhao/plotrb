@@ -75,50 +75,45 @@ module Plotrb
       collected
     end
 
-    # dynamically create getter and setter methods for attribute
-    # @param boolean [Boolean] whether the attribute is a boolean value
-    # @param multiple_values [Boolean] whether the attribute allow multiple
-    #   values
-    def define_attribute_method(method, boolean:false, multiple_values:false)
-      if boolean
-        # when setting boolean values, eg. foo.bar sets bar attribute to true,
-        #   foo.bar? returns state of bar attribute
-        define_singleton_method(method) do |&block|
-          self.instance_variable_set("@#{method}", true)
-          self.instance_eval(&block) if block
-          self
+    def define_boolean_attribute(method)
+      # when setting boolean values, eg. foo.bar sets bar attribute to true,
+      #   foo.bar? returns state of bar attribute
+      define_singleton_method(method) do |&block|
+        self.instance_variable_set("@#{method}", true)
+        self.instance_eval(&block) if block
+        self
+      end
+      define_singleton_method("#{method}?") do
+        self.instance_variable_get("@#{method}")
+      end
+    end
+
+    def define_single_val_attribute(method)
+      # when only single value is allowed, eg. foo.bar(1)
+      define_singleton_method(method) do |*args, &block|
+        case args.size
+          when 0
+            self.instance_variable_get("@#{method}")
+          when 1
+            self.instance_variable_set("@#{method}", args[0])
+            self.instance_eval(&block) if block
+            self
+          else
+            raise ArgumentError
         end
-        define_singleton_method("#{method}?") do
-          self.instance_variable_get("@#{method}")
-        end
-      else
-        # when setting non-boolean values
-        if multiple_values
-          # when multiple values are allowed, eg. foo.bar(1,2) or foo.bar([1,2])
-          define_singleton_method(method) do |*args, &block|
-            case args.size
-              when 0
-                self.instance_variable_get("@#{method}")
-              else
-                self.instance_variable_set("@#{method}", [args].flatten)
-                self.instance_eval(&block) if block
-                self
-            end
-          end
-        else
-          # when only single value is allowed, eg. foo.bar(1)
-          define_singleton_method(method) do |*args, &block|
-            case args.size
-              when 0
-                self.instance_variable_get("@#{method}")
-              when 1
-                self.instance_variable_set("@#{method}", args[0])
-                self.instance_eval(&block) if block
-                self
-              else
-                raise ArgumentError
-            end
-          end
+      end
+    end
+
+    def define_multi_val_attribute(method)
+      # when multiple values are allowed, eg. foo.bar(1,2) or foo.bar([1,2])
+      define_singleton_method(method) do |*args, &block|
+        case args.size
+          when 0
+            self.instance_variable_get("@#{method}")
+          else
+            self.instance_variable_set("@#{method}", [args].flatten)
+            self.instance_eval(&block) if block
+            self
         end
       end
     end
