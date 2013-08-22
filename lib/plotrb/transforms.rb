@@ -40,7 +40,7 @@ module Plotrb
       # @!attributes fields
       #   @return [Array<String>] array of field references to copy
       add_attributes(:fields)
-      define_attribute_method(:fields, multiple_values:true)
+      define_multi_val_attribute(:fields)
       self.class_eval { alias_method :take, :fields }
     end
 
@@ -52,9 +52,9 @@ module Plotrb
       # @!attributes as
       #   @return [Array<String>] the field names to copy the values to
       add_attributes(:from, :fields, :as)
-      define_attribute_method(:from)
-      define_attribute_method(:fields, multiple_values:true)
-      define_attribute_method(:as, multiple_values:true)
+      define_single_val_attribute(:from)
+      define_multi_val_attribute(:fields)
+      define_multi_val_attribute(:as)
       self.class_eval { alias_method :take, :fields }
     end
 
@@ -64,8 +64,8 @@ module Plotrb
       # @!attributes diagonal
       #   @return [Boolean] whether diagonal of cross-product will be included
       add_attributes(:with, :diagonal)
-      define_attribute_method(:with)
-      define_attribute_method(:diagonal, boolean:true)
+      define_single_val_attribute(:with)
+      define_boolean_attribute(:diagonal)
       self.class_eval { alias_method :include_diagonal, :diagonal }
       self.class_eval { alias_method :include_diagonal?, :diagonal? }
     end
@@ -76,8 +76,8 @@ module Plotrb
       # @!attributes sort
       #   @return [String, Array<String>] sort criteria
       add_attributes(:keys, :sort)
-      define_attribute_method(:keys, multiple_values:true)
-      define_attribute_method(:sort, multiple_values:true)
+      define_multi_val_attribute(:keys)
+      define_multi_val_attribute(:sort)
       self.class_eval { alias_method :group_by, :keys }
     end
 
@@ -86,7 +86,7 @@ module Plotrb
       #   @return [String] the expression for the filter predicate, which
       #     includes the variable `d`, corresponding to the current data object
       add_attributes(:test)
-      define_attribute_method(:test)
+      define_single_val_attribute(:test)
     end
 
     def flatten
@@ -98,7 +98,7 @@ module Plotrb
       #   @return [Array<String>] the field references indicating the data
       #     properties to fold
       add_attributes(:fields)
-      define_attribute_method(:fields, multiple_values:true)
+      define_multi_val_attribute(:fields)
       self.class_eval { alias_method :into, :fields }
     end
 
@@ -108,8 +108,8 @@ module Plotrb
       # @!attributes
       #   @return expr [String] the expression for the formula
       add_attributes(:field, :expr)
-      define_attribute_method(:field)
-      define_attribute_method(:expr)
+      define_single_val_attribute(:field)
+      define_single_val_attribute(:expr)
       self.class_eval { alias_method :into, :field }
       self.class_eval { alias_method :apply, :expr }
     end
@@ -120,8 +120,8 @@ module Plotrb
       # @!attributes field
       #   @return [String] the data field to copy the max, min or median value
       add_attributes(:by, :field)
-      define_attribute_method(:by)
-      define_attribute_method(:field)
+      define_single_val_attribute(:by)
+      define_single_val_attribute(:field)
     end
 
     # TODO: allow reverse sort
@@ -130,7 +130,7 @@ module Plotrb
       #   @return [String, Array<String>] a list of fields to use as sort
       #     criteria
       add_attributes(:by)
-      define_attribute_method(:by, multiple_values:true)
+      define_multi_val_attribute(:by)
     end
 
     def stats
@@ -141,9 +141,9 @@ module Plotrb
       # @!attributes assign
       #   @return [Boolean] whether add stat property to each data element
       add_attributes(:value, :median, :assign)
-      define_attribute_method(:value)
-      define_attribute_method(:median, boolean:true)
-      define_attribute_method(:assign, boolean:true)
+      define_single_val_attribute(:value)
+      define_boolean_attribute(:median)
+      define_boolean_attribute(:assign)
       self.class_eval { alias_method :from, :value }
       self.class_eval { alias_method :include_median, :median }
       self.class_eval { alias_method :include_median?, :median? }
@@ -165,12 +165,12 @@ module Plotrb
       # @!attributes wordbreak
       #   @return [Boolean] whether to truncate along word boundaries
       add_attributes(:value, :output, :limit, :position, :ellipsis, :wordbreak)
-      define_attribute_method(:value)
-      define_attribute_method(:output)
-      define_attribute_method(:limit)
-      define_attribute_method(:position)
-      define_attribute_method(:ellipsis)
-      define_attribute_method(:wordbreak, boolean:true)
+      define_single_val_attribute(:value)
+      define_single_val_attribute(:output)
+      define_single_val_attribute(:limit)
+      define_single_val_attribute(:position)
+      define_single_val_attribute(:ellipsis)
+      define_boolean_attribute(:wordbreak)
       self.class_eval { alias_method :from, :value }
       self.class_eval { alias_method :to, :output }
       self.class_eval { alias_method :max_length, :limit }
@@ -189,8 +189,8 @@ module Plotrb
       # @!attributes as
       #   @return [String] the field name to store the unique values
       add_attributes(:field, :as)
-      define_attribute_method(:field)
-      define_attribute_method(:as)
+      define_single_val_attribute(:field)
+      define_single_val_attribute(:as)
       self.class_eval { alias_method :from, :field }
       self.class_eval { alias_method :to, :as }
     end
@@ -201,8 +201,8 @@ module Plotrb
       # @!attributes step
       #   @return [Integer] the step size to advance the window per frame
       add_attributes(:size, :step)
-      define_attribute_method(:size)
-      define_attribute_method(:step)
+      define_single_val_attribute(:size)
+      define_single_val_attribute(:step)
     end
 
     def zip
@@ -221,11 +221,11 @@ module Plotrb
       # @!attributes default
       #   @return [] a default value to use if no matching key value is found
       add_attributes(:with, :as, :key, :with_key, :default)
-      define_attribute_method(:with)
-      define_attribute_method(:as)
-      define_attribute_method(:key)
-      define_attribute_method(:with_key)
-      define_attribute_method(:default)
+      define_single_val_attribute(:with)
+      define_single_val_attribute(:as)
+      define_single_val_attribute(:key)
+      define_single_val_attribute(:with_key)
+      define_single_val_attribute(:default)
       self.class_eval { alias_method :match, :key}
       self.class_eval { alias_method :against, :with_key}
     end
@@ -260,16 +260,16 @@ module Plotrb
       #     node positions are adjusted at each step
       add_attributes(:links, :size, :iterations, :charge, :link_distance,
                      :link_strength, :friction, :theta, :gravity, :alpha)
-      define_attribute_method(:links)
-      define_attribute_method(:size)
-      define_attribute_method(:iterations)
-      define_attribute_method(:charge)
-      define_attribute_method(:link_distance)
-      define_attribute_method(:link_strength)
-      define_attribute_method(:friction)
-      define_attribute_method(:theta)
-      define_attribute_method(:gravity)
-      define_attribute_method(:alpha)
+      define_single_val_attribute(:links)
+      define_single_val_attribute(:size)
+      define_single_val_attribute(:iterations)
+      define_single_val_attribute(:charge)
+      define_single_val_attribute(:link_distance)
+      define_single_val_attribute(:link_strength)
+      define_single_val_attribute(:friction)
+      define_single_val_attribute(:theta)
+      define_single_val_attribute(:gravity)
+      define_single_val_attribute(:alpha)
     end
 
     def geo
@@ -293,15 +293,15 @@ module Plotrb
       #   @return [Numeric] the clip angle of the projection
       add_attributes(:projection, :lon, :lat, :center, :translate, :scale,
                      :rotate, :precision, :clip_angle)
-      define_attribute_method(:projection)
-      define_attribute_method(:lon)
-      define_attribute_method(:lat)
-      define_attribute_method(:center)
-      define_attribute_method(:translate)
-      define_attribute_method(:scale)
-      define_attribute_method(:rotate)
-      define_attribute_method(:precision)
-      define_attribute_method(:clip_angle)
+      define_single_val_attribute(:projection)
+      define_single_val_attribute(:lon)
+      define_single_val_attribute(:lat)
+      define_single_val_attribute(:center)
+      define_single_val_attribute(:translate)
+      define_single_val_attribute(:scale)
+      define_single_val_attribute(:rotate)
+      define_single_val_attribute(:precision)
+      define_single_val_attribute(:clip_angle)
     end
 
     def geopath
@@ -310,14 +310,14 @@ module Plotrb
       # @!attributes (see #geo)
       add_attributes(:field, :projection, :center, :translate, :scale, :rotate,
                      :precision, :clip_angle)
-      define_attribute_method(:field)
-      define_attribute_method(:projection)
-      define_attribute_method(:center)
-      define_attribute_method(:translate)
-      define_attribute_method(:scale)
-      define_attribute_method(:rotate)
-      define_attribute_method(:precision)
-      define_attribute_method(:clip_angle)
+      define_single_val_attribute(:field)
+      define_single_val_attribute(:projection)
+      define_single_val_attribute(:center)
+      define_single_val_attribute(:translate)
+      define_single_val_attribute(:scale)
+      define_single_val_attribute(:rotate)
+      define_single_val_attribute(:precision)
+      define_single_val_attribute(:clip_angle)
     end
 
     def link
@@ -333,10 +333,10 @@ module Plotrb
       #   @return [Numeric] the tension in the range [0,1] for the "tightness"
       #     of 'curve'-shaped links
       add_attributes(:source, :target, :shape, :tension)
-      define_attribute_method(:source)
-      define_attribute_method(:target)
-      define_attribute_method(:shape)
-      define_attribute_method(:tension)
+      define_single_val_attribute(:source)
+      define_single_val_attribute(:target)
+      define_single_val_attribute(:shape)
+      define_single_val_attribute(:tension)
     end
 
     def pie
@@ -345,10 +345,11 @@ module Plotrb
       # @!attributes value
       #   @return [String] the data values to encode as angular spans
       add_attributes(:sort, :value)
-      define_attribute_method(:sort, boolean:true)
-      define_attribute_method(:value)
+      define_boolean_attribute(:sort)
+      define_single_val_attribute(:value)
     end
 
+    # TODO: allow #reverse and #inside_out
     def stack
       # @!attributes point
       #   @return [String] the data field determining the points at which to
@@ -360,10 +361,10 @@ module Plotrb
       # @!attributes order
       #   @return [Symbol] the sort order for stack layers
       add_attributes(:point, :height, :offset, :order)
-      define_attribute_method(:point)
-      define_attribute_method(:height)
-      define_attribute_method(:offset)
-      define_attribute_method(:order)
+      define_single_val_attribute(:point)
+      define_single_val_attribute(:height)
+      define_single_val_attribute(:offset)
+      define_single_val_attribute(:order)
     end
 
     def treemap
@@ -384,12 +385,12 @@ module Plotrb
       #   @return [String] the values to use to determine the area of each
       #     leaf-level treemap cell
       add_attributes(:padding, :ratio, :round, :size, :sticky, :value)
-      define_attribute_method(:padding)
-      define_attribute_method(:ratio)
-      define_attribute_method(:round, boolean:true)
-      define_attribute_method(:size)
-      define_attribute_method(:sticky, boolean:true)
-      define_attribute_method(:value)
+      define_single_val_attribute(:padding)
+      define_single_val_attribute(:ratio)
+      define_boolean_attribute(:round)
+      define_single_val_attribute(:size)
+      define_boolean_attribute(:sticky)
+      define_single_val_attribute(:value)
     end
 
     def wordcloud
@@ -412,14 +413,14 @@ module Plotrb
       #   @return [String] the data field containing the text to visualize
       add_attributes(:font, :font_size, :font_style, :font_weight, :padding,
                      :rotate, :size, :text)
-      define_attribute_method(:font)
-      define_attribute_method(:font_size)
-      define_attribute_method(:font_style)
-      define_attribute_method(:font_weight)
-      define_attribute_method(:padding)
-      define_attribute_method(:rotate)
-      define_attribute_method(:size)
-      define_attribute_method(:text)
+      define_single_val_attribute(:font)
+      define_single_val_attribute(:font_size)
+      define_single_val_attribute(:font_style)
+      define_single_val_attribute(:font_weight)
+      define_single_val_attribute(:padding)
+      define_single_val_attribute(:rotate)
+      define_single_val_attribute(:size)
+      define_single_val_attribute(:text)
     end
 
   end
