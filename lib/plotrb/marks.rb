@@ -7,7 +7,14 @@ module Plotrb
     include ::Plotrb::Base
     include ActiveModel::Validations
 
+    # all available types of marks defined by Vega
     TYPES = %i(rect symbol path arc area line image text)
+
+    TYPES.each do |t|
+      define_singleton_method(t) do |&block|
+        ::Plotrb::Mark.new(t, &block)
+      end
+    end
 
     # @!attributes type
     #   @return [Symbol] the mark type
@@ -26,7 +33,7 @@ module Plotrb
     # @!attributes ease
     #   @return [String] the transition easing function for mark updates
     add_attributes :type, :name, :description, :from, :properties, :key, :delay,
-                  :ease, :group
+                   :ease, :group
 
     class FromValidator < ActiveModel::EachValidator
       def validate_each(record, attribute, value)
@@ -39,6 +46,8 @@ module Plotrb
       rescue NoMethodError
         false
       end
+    def type
+      @type
     end
 
     class EaseValidator < ActiveModel::EachValidator
@@ -46,38 +55,98 @@ module Plotrb
         record.errors.add(attribute, 'invalid easing function') unless
             valid_easing?(value)
       end
+  private
 
-      def valid_easing?(easing)
-        # a valid easing function is type-modifier, such as cubic-in
-        type, modifier = easing.split('-', 2)
-        %w(linear quad cubic sin exp circle bounce).include?(type) &&
-            (modifier.nil? || %w(in out in-out out-in).include?(modifier))
-      end
+    def rect
+      # no additional attributes
     end
 
-    validates :type, presence: true, inclusion: { in: TYPES }
-    validates :from, presence: true, from: true
-    validates :ease, allow_nil: true, ease: true
-
-    # Mark property sets
-    add_attributes :x, :x2, :width, :y, :y2, :height, :opacity, :fill,
-                  :fill_opacity, :stroke, :stroke_width, :stroke_opacity, :size,
-                  :shape, :path, :inner_radius, :outer_radius, :start_angle,
-                  :end_angle, :interpolate, :tension, :url, :align, :baseline,
-                  :text, :align, :dx, :dy, :angle, :font, :font_size,
-                  :font_weight, :font_style
-
-    class ValueReferenceValidator < ActiveModel::EachValidator
-      def validate_each(record, attribute, value)
-        record.errors.add(attribute, 'invalid ValueRef') unless
-            value.is_a?(::Plotrb::Mark::ValueRef) && value.valid?
-      end
+    def symbol
+      # @!attribute size
+      #   @return [ValueRef] the pixel area of the symbol
+      # @!attribute shape
+      #   @return [ValueRef] the symbol shape
+      add_attributes(:size, :shape)
+      define_single_val_attributes(:size, :shape)
     end
 
-    def initialize(args={})
-      args.each do |k, v|
-        self.instance_variable_set("@#{k}", v) if self.attributes.include?(k)
-      end
+    def path
+      # @!attribute path
+      #   @return [ValueRef] the path definition in SVG path string
+      add_attributes(:path)
+      define_single_val_attribute(:path)
+    end
+
+    def arc
+      # @!attribute inner_radius
+      #   @return [ValueRef] the inner radius of the arc in pixels
+      # @!attribute outer_radius
+      #   @return [ValueRef] the outer radius of the arc in pixels
+      # @!attribute start_angle
+      #   @return [ValueRef] the start angle of the arc in radians
+      # @!attribute end_angle
+      #   @return [ValueRef] the end angle of the arc in radians
+      add_attributes(:inner_radius, :outer_radius, :start_angle, :end_angle)
+      define_single_val_attributes(:inner_radius, :outer_radius, :start_angle,
+                                  :end_angle)
+    end
+
+    def area
+      # @!attribute interpolate
+      #   @return [ValueRef] the line interpolation method to use
+      # @!attribute tension
+      #   @return [ValueRef] the tension parameter for the interpolation
+      add_attributes(:interpolate, :tension)
+      define_single_val_attributes(:interpolate, :tension)
+    end
+
+    def line
+      # @!attribute interpolate
+      #   @return [ValueRef] the line interpolation method to use
+      # @!attribute tension
+      #   @return [ValueRef] the tension parameter for the interpolation
+      add_attributes(:interpolate, :tension)
+      define_single_val_attributes(:interpolate, :tension)
+    end
+
+    def image
+      # @!attribute url
+      #   @return [ValueRef] the url from which to retrieve the image
+      # @!attribute align
+      #   @return [ValueRef] the horizontal alignment of the image
+      # @!attribute baseline
+      #   @return [ValueRef] the vertical alignment of the image
+      add_attributes(:url, :align, :baseline)
+      define_single_val_attributes(:url, :align, :baseline)
+    end
+
+    def text
+      # @!attribute text
+      #   @return [ValueRef] the text to display
+      # @!attribute align
+      #   @return [ValueRef] the horizontal alignment of the text
+      # @!attribute baseline
+      #   @return [ValueRef] the vertical alignment of the text
+      # @!attribute dx
+      #   @return [ValueRef] the horizontal margin between text label and its
+      #     anchor point
+      # @!attribute dy
+      #   @return [ValueRef] the vertical margin between text label and its
+      #     anchor point
+      # @!attribute angle
+      #   @return [ValueRef] the rotation angle of the text in degrees
+      # @!attribute font
+      #   @return [ValueRef] the font of the text
+      # @!attribute font_size
+      #   @return [ValueRef] the font size
+      # @!attribute font_weight
+      #   @return [ValueRef] the font weight
+      # @!attribute font_style
+      #   @return [ValueRef] the font style
+      add_attributes(:text, :align, :baseline, :dx, :dy, :angle, :font,
+                     :font_size, :font_weight, :font_style)
+      define_single_val_attributes(:text, :align, :baseline, :dx, :dy, :angle,
+                                   :font, :font_size, :font_weight, :font_style)
     end
 
   end
