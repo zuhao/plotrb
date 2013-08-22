@@ -88,6 +88,10 @@ module Plotrb
       end
     end
 
+    def define_boolean_attributes(*methods)
+      methods.each { |m| define_boolean_attribute(m) }
+    end
+
     def define_single_val_attribute(method)
       # when only single value is allowed, eg. foo.bar(1)
       define_singleton_method(method) do |*args, &block|
@@ -104,6 +108,10 @@ module Plotrb
       end
     end
 
+    def define_single_val_attributes(*methods)
+      methods.each { |m| define_single_val_attribute(m) }
+    end
+
     def define_multi_val_attribute(method)
       # when multiple values are allowed, eg. foo.bar(1,2) or foo.bar([1,2])
       define_singleton_method(method) do |*args, &block|
@@ -116,6 +124,10 @@ module Plotrb
             self
         end
       end
+    end
+
+    def define_multi_val_attributes(*methods)
+      methods.each { |m| define_multi_val_attribute(m) }
     end
 
     def classify(name, format=nil)
