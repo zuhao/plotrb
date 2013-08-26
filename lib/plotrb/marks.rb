@@ -56,7 +56,7 @@ module Plotrb
 
     def enter(&block)
       @properties.merge!(
-          { exit: ::Plotrb::Mark::MarkProperty.new(&block) }
+          { enter: ::Plotrb::Mark::MarkProperty.new(&block) }
       )
       self
     end
@@ -224,7 +224,7 @@ module Plotrb
 
       def initialize(&block)
         define_single_val_attributes *VISUAL_PROPERTIES
-        self.class_eval {
+        self.singleton_class.class_eval {
           alias_method :x_start, :x
           alias_method :x_end, :x2
           alias_method :y_start, :y
@@ -280,7 +280,8 @@ module Plotrb
         add_attributes *VALUE_REF_PROPERTIES
 
         def initialize(value=nil, &block)
-          define_single_val_attributes *VALUE_REF_PROPERTIES
+          define_single_val_attributes(:value, :field, :scale, :mult, :offset)
+          define_boolean_attribute(:band)
           if value
             @value = value
           end
