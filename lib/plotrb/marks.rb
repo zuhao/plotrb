@@ -16,6 +16,8 @@ module Plotrb
       end
     end
 
+    # Top level mark properties
+
     # @!attributes type
     #   @return [Symbol] the mark type
     # @!attributes name
@@ -40,6 +42,52 @@ module Plotrb
         record.errors.add(attribute, 'invalid object') unless
             valid_from?(value)
       end
+    # Shared visual properties
+
+    # @!attributes x
+    #   @return [ValueRef] the first (left-most) x-coordinate
+    # @!attributes x2
+    #   @return [ValueRef] the second (right-most) x-coordinate
+    # @!attributes width
+    #   @return [ValueRef] the width of the mark
+    # @!attributes y
+    #   @return [ValueRef] the first (top-most) y-coordinate
+    # @!attributes y2
+    #   @return [ValueRef] the second (bottom-most) y-coordinate
+    # @!attributes height
+    #   @return [ValueRef] the height of the mark
+    # @!attributes opacity
+    #   @return [ValueRef] the overall opacity
+    # @!attributes fill
+    #   @return [ValueRef] the fill color
+    # @!attributes fill_opacity
+    #   @return [ValueRef] the fill opacity
+    # @!attributes stroke
+    #   @return [ValueRef] the stroke color
+    # @!attributes stroke_width
+    #   @return [ValueRef] the stroke width in pixels
+    # @!attributes stroke_opacity
+    #   @return [ValueRef] the stroke opacity
+    # @!attributes stroke_dash
+    #   @return [ValueRef] alternating stroke, space lengths for creating dashed
+    #     or dotted lines
+    # @!attributes stroke_dash_offset
+    #   @return [ValueRef] the offset into which to begin the stroke dash
+    add_attributes :x, :x2, :width, :y, :y2, :height, :opacity, :fill,
+                   :fill_opacity, :stroke, :stroke_width, :stroke_opacity,
+                   :stroke_dash, :stroke_dash_offset
+
+    def initialize(type, &block)
+      @type = type
+      self.send(@type)
+      define_single_val_attributes(:name, :description, :from, :properties,
+                                   :key, :delay, :ease, :group)
+      define_single_val_attributes(:x, :x2, :width, :y, :y2, :height, :opacity,
+                                   :fill, :fill_opacity, :stroke, :stroke_width,
+                                   :stroke_opacity, :stroke_dash,
+                                   :stroke_dash_offset)
+      self.instance_eval(&block) if block_given?
+    end
 
       def valid_from?(from)
         (from.keys - %i(data transform)).empty?
