@@ -7,6 +7,14 @@ module Plotrb
 
     include ::Plotrb::Base
 
+    TYPES = %i(x y)
+
+    TYPES.each do |t|
+      define_singleton_method(t) do |&block|
+        ::Plotrb::Axis.new(t, &block)
+      end
+    end
+
     # @!attribute type
     #   @return [Symbol] type of the axis, either :x or :y
     # @!attribute scale
@@ -47,10 +55,8 @@ module Plotrb
                   :tick_size_end, :offset, :properties, :title, :title_offset,
                   :grid
 
-    def initialize(args={}, &block)
-      args.each do |k, v|
-        self.instance_variable_set("@#{k}", v) if self.attributes.include?(k)
-      end
+    def initialize(type, &block)
+      @type = type
       self.instance_eval(&block) if block_given?
       self
     end

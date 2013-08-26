@@ -7,6 +7,14 @@ module Plotrb
 
     include ::Plotrb::Base
 
+    TYPES = %i(linear log pow sqrt quantile quantize threshold ordinal time utc)
+
+    TYPES.each do |t|
+      define_singleton_method(t) do |&block|
+        ::Plotrb::Scale.new(t, &block)
+      end
+    end
+
     # @!attributes name
     #   @return [String] the name of the scale
     # @!attributes type
@@ -54,10 +62,8 @@ module Plotrb
     RANGE_LITERALS = %i(width height shapes colors more_colors)
     TIME_SCALE_NICE = %i(second minute hour day week month year)
 
-    def initialize(args={}, &block)
-      args.each do |k, v|
-        self.instance_variable_set("@#{k}", v) if self.attributes.include?(k)
-      end
+    def initialize(type=:linear, &block)
+      @type = type
       self.instance_eval(&block) if block_given?
       self
     end

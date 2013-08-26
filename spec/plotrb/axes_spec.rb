@@ -18,7 +18,7 @@ describe 'Axis' do
     end
 
     it 'sets the scale backing the axis by the scale object' do
-      scale = ::Plotrb::Scale.new(name: 'foo_scale')
+      scale = ::Plotrb::Scale.new.name('foo_scale')
       subject.from(scale)
       subject.scale.should == 'foo_scale'
     end
