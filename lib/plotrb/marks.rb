@@ -5,7 +5,6 @@ module Plotrb
   class Mark
 
     include ::Plotrb::Base
-    include ActiveModel::Validations
 
     # all available types of marks defined by Vega
     TYPES = %i(rect symbol path arc area line image text)
@@ -37,11 +36,6 @@ module Plotrb
     add_attributes :type, :name, :description, :from, :properties, :key, :delay,
                    :ease, :group
 
-    class FromValidator < ActiveModel::EachValidator
-      def validate_each(record, attribute, value)
-        record.errors.add(attribute, 'invalid object') unless
-            valid_from?(value)
-      end
     # Shared visual properties
 
     # @!attributes x
@@ -89,20 +83,10 @@ module Plotrb
       self.instance_eval(&block) if block_given?
     end
 
-      def valid_from?(from)
-        (from.keys - %i(data transform)).empty?
-      rescue NoMethodError
-        false
-      end
     def type
       @type
     end
 
-    class EaseValidator < ActiveModel::EachValidator
-      def validate_each(record, attribute, value)
-        record.errors.add(attribute, 'invalid easing function') unless
-            valid_easing?(value)
-      end
   private
 
     def rect
@@ -203,7 +187,6 @@ module Plotrb
   class ValueRef
 
     include ::Plotrb::Base
-    include ActiveModel::Validations
 
     # @!attributes value
     #   @return A constant value
@@ -220,13 +203,9 @@ module Plotrb
     #     retrieved value
     add_attributes :value, :field, :scale, :mult, :offset, :band
 
-    validates :mult, allow_nil: true, numericality: true
-    validates :offset, allow_nil: true, numericality: true
-
     def initialize(args={})
-      args.each do |k, v|
-        self.instance_variable_set("@#{k}", v) if self.attributes.include?(k)
-      end
+      define_single_val_attributes(:value, :field, :scale, :mult, :offset,
+                                   :band)
     end
 
   end
