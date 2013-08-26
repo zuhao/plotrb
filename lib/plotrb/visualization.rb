@@ -55,6 +55,14 @@ module Plotrb
       end
     end
 
+    def x_axis
+      ::Plotrb::Axis.new(:x)
+    end
+
+    def y_axis
+      ::Plotrb::Axis.new(:y)
+    end
+
   end
 
 end
