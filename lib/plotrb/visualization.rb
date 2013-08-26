@@ -27,11 +27,14 @@ module Plotrb
     add_attributes :name, :width, :height, :viewport, :padding, :data, :scales,
                   :marks, :axes
 
-    def initialize(args={})
+    def initialize(args={}, &block)
       default = {width: 500, height: 500}
       args.reverse_merge(default).each do |k, v|
         self.instance_variable_set("@#{k}", v) if self.attributes.include?(k)
       end
+      define_single_val_attributes(:name, :width, :height, :viewport, :padding)
+      define_multi_val_attributes(:data, :scales, :marks, :axes)
+      self.instance_eval(&block) if block_given?
     end
 
     def method_missing(method, *args, &block)
