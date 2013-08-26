@@ -224,7 +224,37 @@ module Plotrb
 
       def initialize(&block)
         define_single_val_attributes *VISUAL_PROPERTIES
+        self.class_eval {
+          alias_method :x_start, :x
+          alias_method :x_end, :x2
+          alias_method :y_start, :y
+          alias_method :y_end, :y2
+        }
         self.instance_eval(&block) if block_given?
+      end
+
+      def define_single_val_attribute(method)
+        define_singleton_method(method) do |*args, &block|
+          if block
+            val = ::Plotrb::Mark::MarkProperty::ValueRef.new(*args, &block)
+            self.instance_variable_set("@#{method}", val)
+          else
+            case args.size
+              when 0
+                self.instance_variable_get("@#{method}")
+              when 1
+                val = ::Plotrb::Mark::MarkProperty::ValueRef.new(args[0])
+                self.instance_variable_set("@#{method}", val)
+              else
+                raise ArgumentError
+            end
+          end
+          self
+        end
+      end
+
+      def define_single_val_attributes(*method)
+        method.each { |m| define_single_val_attribute(m) }
       end
 
       # A value reference specifies the value for a given mark property
@@ -249,9 +279,12 @@ module Plotrb
 
         add_attributes *VALUE_REF_PROPERTIES
 
-        def initialize(&block)
+        def initialize(value=nil, &block)
           define_single_val_attributes *VALUE_REF_PROPERTIES
-          self.instance_eval(&block) if block_given?
+          if value
+            @value = value
+          end
+          self.instance_eval(&block) if block
         end
 
       end
