@@ -26,60 +26,22 @@ module Plotrb
     # @!attributes from
     #   @return [Hash] the data this mark set should visualize
     # @!attributes properties
-    #   @return [Hash] the property set definitions
+    #   @return [MarkProperty] the property set definitions
     # @!attributes key
     #   @return [String] the data field to use an unique key for data binding
     # @!attributes delay
     #   @return [ValueRef] the transition delay for mark updates
     # @!attributes ease
     #   @return [String] the transition easing function for mark updates
-    add_attributes :type, :name, :description, :from, :properties, :key, :delay,
-                   :ease, :group
+    MARK_PROPERTIES = [:type, :name, :description, :from, :properties, :key,
+                       :delay, :ease, :group]
 
-    # Shared visual properties
-
-    # @!attributes x
-    #   @return [ValueRef] the first (left-most) x-coordinate
-    # @!attributes x2
-    #   @return [ValueRef] the second (right-most) x-coordinate
-    # @!attributes width
-    #   @return [ValueRef] the width of the mark
-    # @!attributes y
-    #   @return [ValueRef] the first (top-most) y-coordinate
-    # @!attributes y2
-    #   @return [ValueRef] the second (bottom-most) y-coordinate
-    # @!attributes height
-    #   @return [ValueRef] the height of the mark
-    # @!attributes opacity
-    #   @return [ValueRef] the overall opacity
-    # @!attributes fill
-    #   @return [ValueRef] the fill color
-    # @!attributes fill_opacity
-    #   @return [ValueRef] the fill opacity
-    # @!attributes stroke
-    #   @return [ValueRef] the stroke color
-    # @!attributes stroke_width
-    #   @return [ValueRef] the stroke width in pixels
-    # @!attributes stroke_opacity
-    #   @return [ValueRef] the stroke opacity
-    # @!attributes stroke_dash
-    #   @return [ValueRef] alternating stroke, space lengths for creating dashed
-    #     or dotted lines
-    # @!attributes stroke_dash_offset
-    #   @return [ValueRef] the offset into which to begin the stroke dash
-    add_attributes :x, :x2, :width, :y, :y2, :height, :opacity, :fill,
-                   :fill_opacity, :stroke, :stroke_width, :stroke_opacity,
-                   :stroke_dash, :stroke_dash_offset
+    add_attributes *MARK_PROPERTIES
 
     def initialize(type, &block)
       @type = type
       self.send(@type)
-      define_single_val_attributes(:name, :description, :from, :properties,
-                                   :key, :delay, :ease, :group)
-      define_single_val_attributes(:x, :x2, :width, :y, :y2, :height, :opacity,
-                                   :fill, :fill_opacity, :stroke, :stroke_width,
-                                   :stroke_opacity, :stroke_dash,
-                                   :stroke_dash_offset)
+      define_single_val_attributes *(MARK_PROPERTIES - [:type])
       self.instance_eval(&block) if block_given?
     end
 
@@ -98,15 +60,17 @@ module Plotrb
       #   @return [ValueRef] the pixel area of the symbol
       # @!attribute shape
       #   @return [ValueRef] the symbol shape
-      add_attributes(:size, :shape)
-      define_single_val_attributes(:size, :shape)
+      attrs = [:size, :shape]
+      add_attributes *attrs
+      define_single_val_attributes *attrs
     end
 
     def path
       # @!attribute path
       #   @return [ValueRef] the path definition in SVG path string
-      add_attributes(:path)
-      define_single_val_attribute(:path)
+      attrs = [:path]
+      add_attributes *attrs
+      define_single_val_attribute *attrs
     end
 
     def arc
@@ -118,9 +82,9 @@ module Plotrb
       #   @return [ValueRef] the start angle of the arc in radians
       # @!attribute end_angle
       #   @return [ValueRef] the end angle of the arc in radians
-      add_attributes(:inner_radius, :outer_radius, :start_angle, :end_angle)
-      define_single_val_attributes(:inner_radius, :outer_radius, :start_angle,
-                                  :end_angle)
+      attrs = [:inner_radius, :outer_radius, :start_angle, :end_angle]
+      add_attributes *attrs
+      define_single_val_attributes *attrs
     end
 
     def area
@@ -128,8 +92,9 @@ module Plotrb
       #   @return [ValueRef] the line interpolation method to use
       # @!attribute tension
       #   @return [ValueRef] the tension parameter for the interpolation
-      add_attributes(:interpolate, :tension)
-      define_single_val_attributes(:interpolate, :tension)
+      attrs = [:interpolate, :tension]
+      add_attributes *attrs
+      define_single_val_attributes *attrs
     end
 
     def line
@@ -137,8 +102,9 @@ module Plotrb
       #   @return [ValueRef] the line interpolation method to use
       # @!attribute tension
       #   @return [ValueRef] the tension parameter for the interpolation
-      add_attributes(:interpolate, :tension)
-      define_single_val_attributes(:interpolate, :tension)
+      attrs = [:interpolate, :tension]
+      add_attributes *attrs
+      define_single_val_attributes *attrs
     end
 
     def image
@@ -148,8 +114,9 @@ module Plotrb
       #   @return [ValueRef] the horizontal alignment of the image
       # @!attribute baseline
       #   @return [ValueRef] the vertical alignment of the image
-      add_attributes(:url, :align, :baseline)
-      define_single_val_attributes(:url, :align, :baseline)
+      attrs = [:url, :align, :baseline]
+      add_attributes *attrs
+      define_single_val_attributes *attrs
     end
 
     def text
@@ -175,37 +142,87 @@ module Plotrb
       #   @return [ValueRef] the font weight
       # @!attribute font_style
       #   @return [ValueRef] the font style
-      add_attributes(:text, :align, :baseline, :dx, :dy, :angle, :font,
-                     :font_size, :font_weight, :font_style)
-      define_single_val_attributes(:text, :align, :baseline, :dx, :dy, :angle,
-                                   :font, :font_size, :font_weight, :font_style)
+      attrs = [:text, :align, :baseline, :dx, :dy, :angle, :font, :font_size,
+               :font_weight, :font_style]
+      add_attributes *attrs
+      define_single_val_attributes *attrs
     end
 
-  end
+    class MarkProperty
 
-  # A value reference specifies the value for a given mark property
-  class ValueRef
+      include ::Plotrb::Base
 
-    include ::Plotrb::Base
+      # Shared visual properties
 
-    # @!attributes value
-    #   @return A constant value
-    # @!attributes field
-    #   @return [String] A field from which to pull a data value
-    # @!attributes scale
-    #   @return [String] the name of a scale transform to apply
-    # @!attributes mult
-    #   @return [Numeric] a multiplier for the value
-    # @!attributes offset
-    #   @return [Numeric] an additive offset to bias the final value
-    # @!attributes band
-    #   @return [Boolean] whether to use range band of the scale as the
-    #     retrieved value
-    add_attributes :value, :field, :scale, :mult, :offset, :band
+      # @!attributes x
+      #   @return [ValueRef] the first (left-most) x-coordinate
+      # @!attributes x2
+      #   @return [ValueRef] the second (right-most) x-coordinate
+      # @!attributes width
+      #   @return [ValueRef] the width of the mark
+      # @!attributes y
+      #   @return [ValueRef] the first (top-most) y-coordinate
+      # @!attributes y2
+      #   @return [ValueRef] the second (bottom-most) y-coordinate
+      # @!attributes height
+      #   @return [ValueRef] the height of the mark
+      # @!attributes opacity
+      #   @return [ValueRef] the overall opacity
+      # @!attributes fill
+      #   @return [ValueRef] the fill color
+      # @!attributes fill_opacity
+      #   @return [ValueRef] the fill opacity
+      # @!attributes stroke
+      #   @return [ValueRef] the stroke color
+      # @!attributes stroke_width
+      #   @return [ValueRef] the stroke width in pixels
+      # @!attributes stroke_opacity
+      #   @return [ValueRef] the stroke opacity
+      # @!attributes stroke_dash
+      #   @return [ValueRef] alternating stroke, space lengths for creating dashed
+      #     or dotted lines
+      # @!attributes stroke_dash_offset
+      #   @return [ValueRef] the offset into which to begin the stroke dash
+      VISUAL_PROPERTIES = [:x, :x2, :width, :y, :y2, :height, :opacity, :fill,
+                           :fill_opacity, :stroke, :stroke_width,
+                           :stroke_opacity, :stroke_dash, :stroke_dash_offset]
 
-    def initialize(args={})
-      define_single_val_attributes(:value, :field, :scale, :mult, :offset,
-                                   :band)
+      add_attributes *VISUAL_PROPERTIES
+
+      def initialize(&block)
+        define_single_val_attributes *VISUAL_PROPERTIES
+        self.instance_eval(&block) if block_given?
+      end
+
+      # A value reference specifies the value for a given mark property
+      class ValueRef
+
+        include ::Plotrb::Base
+
+        # @!attributes value
+        #   @return A constant value
+        # @!attributes field
+        #   @return [String] A field from which to pull a data value
+        # @!attributes scale
+        #   @return [String] the name of a scale transform to apply
+        # @!attributes mult
+        #   @return [Numeric] a multiplier for the value
+        # @!attributes offset
+        #   @return [Numeric] an additive offset to bias the final value
+        # @!attributes band
+        #   @return [Boolean] whether to use range band of the scale as the
+        #     retrieved value
+        VALUE_REF_PROPERTIES = [:value, :field, :scale, :mult, :offset, :band]
+
+        add_attributes *VALUE_REF_PROPERTIES
+
+        def initialize(&block)
+          define_single_val_attributes *VALUE_REF_PROPERTIES
+          self.instance_eval(&block) if block_given?
+        end
+
+      end
+
     end
 
   end
