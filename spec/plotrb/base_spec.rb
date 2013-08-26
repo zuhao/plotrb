@@ -48,7 +48,7 @@ describe 'Base' do
 
     let(:foo) { FooClass.new }
     before(:each) do
-      foo.class_eval { add_attributes :foo_foo }
+      foo.singleton_class.class_eval { add_attributes :foo_foo }
     end
 
     it 'tracks both class-defined and instance-defined attributes' do
