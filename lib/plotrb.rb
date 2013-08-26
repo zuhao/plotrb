@@ -1,10 +1,8 @@
 require 'yajl'
 require 'json'
 require 'uri'
-require 'active_model'
 
 require_relative 'plotrb/base'
-require_relative 'plotrb/validators'
 
 require_relative 'plotrb/visualization'
 require_relative 'plotrb/errors'
