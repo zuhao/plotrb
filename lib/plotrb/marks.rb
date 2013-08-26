@@ -41,12 +41,45 @@ module Plotrb
     def initialize(type, &block)
       @type = type
       self.send(@type)
-      define_single_val_attributes *(MARK_PROPERTIES - [:type])
+      @properties = {}
+      define_single_val_attributes *(MARK_PROPERTIES - [:type, :properties])
       self.instance_eval(&block) if block_given?
     end
 
     def type
       @type
+    end
+
+    def properties
+      @properties
+    end
+
+    def enter(&block)
+      @properties.merge!(
+          { exit: ::Plotrb::Mark::MarkProperty.new(&block) }
+      )
+      self
+    end
+
+    def exit(&block)
+      @properties.merge!(
+          { exit: ::Plotrb::Mark::MarkProperty.new(&block) }
+      )
+      self
+    end
+
+    def update(&block)
+      @properties.merge!(
+          { update: ::Plotrb::Mark::MarkProperty.new(&block) }
+      )
+      self
+    end
+
+    def hover(&block)
+      @properties.merge!(
+          { hover: ::Plotrb::Mark::MarkProperty.new(&block) }
+      )
+      self
     end
 
   private
