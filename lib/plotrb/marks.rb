@@ -282,6 +282,12 @@ module Plotrb
         def initialize(value=nil, &block)
           define_single_val_attributes(:value, :field, :scale, :mult, :offset)
           define_boolean_attribute(:band)
+          self.singleton_class.class_eval {
+            alias_method :from, :field
+            alias_method :use_band, :band
+            alias_method :use_band?, :band?
+            alias_method :times, :mult
+          }
           if value
             @value = value
           end
