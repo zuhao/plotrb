@@ -37,65 +37,33 @@ module Plotrb
     #   @return [Boolean] whether flips the scale range
     # @!attributes round
     #   @return [Boolean] whether rounds numeric output values to integers
-    # @!attributes points
-    #   @return [Boolean] whether distributes the ordinal values over a
-    #     quantitative range at uniformly spaced points or bands
-    # @!attributes clamp
-    #   @return [Boolean] whether clamps values that exceed the data domain
-    #     to either to minimum or maximum range value
-    # @!attributes nice
-    #   @return [Symbol, Boolean, nil] scale domain in a more human-friendly
-    #     value range
-    # @!attributes exponent
-    #   @return [Numeric] the exponent of the scale transformation
-    # @!attributes zero
-    #   @return [Boolean] whether zero baseline value is included
-    # @!attributes padding
-    #   @return [Numeric] the spacing among ordinal elements in the scale range
-    # @!attributes sort
-    #   @return [Boolean] whether values in the scale domain will be sorted
-    #     according to their natural order
-    add_attributes :name, :type, :domain, :domain_min, :domain_max, :range,
-                  :range_min, :range_max, :reverse, :round, :points, :clamp,
-                  :nice, :exponent, :zero, :padding, :sort
+
+    SCALE_PROPERTIES = [:name, :type, :domain, :domain_min, :domain_max, :range,
+                        :range_min, :range_max, :reverse, :round]
+
+    add_attributes *SCALE_PROPERTIES
 
     RANGE_LITERALS = %i(width height shapes colors more_colors)
     TIME_SCALE_NICE = %i(second minute hour day week month year)
 
     def initialize(type=:linear, &block)
       @type = type
+      case @type
+        when :ordinal
+          self.send(:ordinal_scale)
+        when :time, :utc
+          self.send(:time_scale)
+        else
+          self.send(:quantitative_scale)
+      end
+      define_single_val_attributes :name
+      define_boolean_attributes :reverse, :round
       self.instance_eval(&block) if block_given?
       self
     end
 
-    def name(*args, &block)
-      case args.size
-        when 0
-          @name
-        when 1
-          @name = args[0]
-          self.instance_eval(&block) if block_given?
-          self
-        else
-          raise ArgumentError
-      end
-    end
-
-    def to_s
-      @name
-    end
-
-    def type(*args, &block)
-      case args.size
-        when 0
-          @type
-        when 1
-          @type = args[0].to_sym
-          self.instance_eval(&block) if block_given?
-          self
-        else
-          raise ArgumentError
-      end
+    def type
+      @type
     end
 
     def domain(*args, &block)
@@ -190,149 +158,6 @@ module Plotrb
       end
     end
 
-    def reverse(&block)
-      @reverse = true
-      self.instance_eval(&block) if block_given?
-      self
-    end
-
-    def reverse?
-      @reverse
-    end
-
-    def round(&block)
-      @round = true
-      self.instance_eval(&block) if block_given?
-      self
-    end
-
-    def round?
-      @round
-    end
-
-    def points(&block)
-      @points = true
-      self.instance_eval(&block) if block_given?
-      self
-    end
-    alias_method :as_points, :points
-
-    def points?
-      @points
-    end
-    alias_method :as_points?, :points?
-
-    def bands(&block)
-      @points = false
-      self.instance_eval(&block) if block_given?
-      self
-    end
-    alias_method :as_bands, :bands
-
-    def bands?
-      !@points
-    end
-    alias_method :as_bands?, :bands?
-
-    def padding(*args, &block)
-      case args.size
-        when 0
-          @padding
-        when 1
-          @padding = args[0].to_f
-          self.instance_eval(&block) if block_given?
-          self
-        else
-          raise ArgumentError
-      end
-    end
-
-    def sort(&block)
-      @sort = true
-      self.instance_eval(&block) if block_given?
-      self
-    end
-
-    def sort?
-      @sort
-    end
-
-    def exponent(*args, &block)
-      case args.size
-        when 0
-          @exponent
-        when 1
-          @exponent = args[0]
-          self.instance_eval(&block) if block_given?
-          self
-        else
-          raise ArgumentError
-      end
-    end
-    alias_method :in_exponent, :exponent
-
-    def nice(*args, &block)
-      if %i(time utc).include?(@type)
-        # nice literals only for time and utc types
-        case args.size
-          when 0
-            # getter
-            @nice
-          when 1
-            # setter
-            @nice = args[0].to_sym
-            self.instance_eval(&block) if block_given?
-            self
-          else
-            raise ArgumentError
-        end
-      else
-        # boolean for all other types
-        case args.size
-          when 0
-            # setter
-            @nice = true
-            self.instance_eval(&block) if block_given?
-            self
-          else
-            raise ArgumentError
-        end
-      end
-    end
-    alias_method :nicely, :nice
-
-    def nice?
-      if %i(time utc).include?(@type)
-        raise NoMethodError
-      else
-        # getter
-        @nice
-      end
-    end
-    alias_method :nicely?, :nice?
-
-    def zero(&block)
-      @zero = true
-      self.instance_eval(&block) if block_given?
-      self
-    end
-    alias_method :include_zero, :zero
-
-    def zero?
-      @zero
-    end
-    alias_method :include_zero?, :zero?
-
-    def clamp(&block)
-      @clamp = true
-      self.instance_eval(&block) if block_given?
-      self
-    end
-
-    def clamp?
-      @clamp
-    end
-
     def method_missing(method, *args, &block)
       case method.to_s
         when /in_(\w+)s$/ # set @nice for time and utc type, eg. in_seconds
@@ -354,14 +179,77 @@ module Plotrb
 
   private
 
+    def ordinal_scale
+      # @!attributes points
+      #   @return [Boolean] whether distributes the ordinal values over a
+      #     quantitative range at uniformly spaced points or bands
+      # @!attributes padding
+      #   @return [Numeric] the spacing among ordinal elements in the scale range
+      # @!attributes sort
+      #   @return [Boolean] whether values in the scale domain will be sorted
+      #     according to their natural order
+      add_attributes :points, :padding, :sort
+      define_boolean_attributes :points, :sort
+      define_single_val_attribute :padding
+      self.singleton_class.class_eval {
+        def bands(&block)
+          @points = false
+          self.instance_eval(&block) if block
+          self
+        end
+        def bands?
+          !@points
+        end
+        alias_method :as_bands, :bands
+        alias_method :as_bands?, :bands?
+        alias_method :as_points, :points
+        alias_method :as_points?, :points?
+      }
+    end
+
+    def time_scale
+      # @!attributes clamp
+      #   @return [Boolean] whether clamps values that exceed the data domain
+      #     to either to minimum or maximum range value
+      # @!attributes nice
+      #   @return [Symbol, Boolean, nil] scale domain in a more human-friendly
+      #     value range
+      add_attributes :clamp, :nice
+      define_boolean_attribute :clamp
+      define_single_val_attribute :nice
+    end
+
+    def quantitative_scale
+      # @!attributes clamp
+      #   @return [Boolean] whether clamps values that exceed the data domain
+      #     to either to minimum or maximum range value
+      # @!attributes nice
+      #   @return [Boolean] scale domain in a more human-friendly
+      #     value range
+      # @!attributes exponent
+      #   @return [Numeric] the exponent of the scale transformation
+      # @!attributes zero
+      #   @return [Boolean] whether zero baseline value is included
+      add_attributes :clamp, :exponent, :nice, :zero
+      define_boolean_attributes :clamp, :nice, :zero
+      define_single_val_attribute :exponent
+      self.singleton_class.class_eval {
+        alias_method :nicely, :nice
+        alias_method :nicely?, :nice?
+        alias_method :include_zero, :zero
+        alias_method :include_zero?, :zero?
+        alias_method :in_exponent, :exponent
+      }
+    end
+
     def parse_domain(domain)
       case domain
         when String
           source, field = domain.split('.', 2)
           if field.nil? || field == 'index'
-            ::Plotrb::DataRef.new(data: source, field: 'index')
+            ::Plotrb::DataRef.new.data(source).field('index')
           else
-            ::Plotrb::DataRef.new(data: source, field: "data.#{field}")
+            ::Plotrb::DataRef.new.data.(source).field("data.#{field}")
           end
         else
           domain
@@ -390,49 +278,41 @@ module Plotrb
       end
     end
 
-  end
+    # A data reference specifies the field for a given scale property
+    class DataRef
 
-  # A data reference specifies the field for a given scale property
-  class DataRef
+      include ::Plotrb::Base
 
-    include ::Plotrb::Base
+      # @!attributes data
+      #   @return [String] the name of a data set
+      # @!attributes field
+      #   @return [String] A field from which to pull a data values
+      add_attributes :data, :field
 
-    # @!attributes data
-    #   @return [String] the name of a data set
-    # @!attributes field
-    #   @return [String] A field from which to pull a data values
-    add_attributes :data, :field
-
-    def initialize(args={})
-      args.each do |k, v|
-        self.instance_variable_set("@#{k}", v) if self.attributes.include?(k)
+      # TODO: Support group
+      def initialize(&block)
+        data_proc = lambda { |d|
+          case d
+            when String
+              d
+            when ::Plotrb::Data
+              d.name
+            else
+              raise ArgumentError
+          end
+        }
+        field_proc = lambda { |f|
+          if f.nil? || f == 'index'
+            'index'
+          else
+            "data.#{f}"
+          end
+        }
+        define_single_val_attribute(:data, data_proc)
+        define_single_val_attribute(:field, field_proc)
+        self.instance_eval(&block) if block
       end
-    end
 
-    def data(*args, &block)
-      case args.size
-        when 0
-          @data
-        when 1
-          @data = args[0]
-          self.instance_eval(&block) if block_given?
-          self
-        else
-          raise ArgumentError
-      end
-    end
-
-    def field(*args, &block)
-      case args.size
-        when 0
-          @field
-        when 1
-          @field = args[0]
-          self.instance_eval(&block) if block_given?
-          self
-        else
-          raise ArgumentError
-      end
     end
 
   end
