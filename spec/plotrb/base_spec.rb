@@ -158,26 +158,55 @@ describe 'Base' do
 
     let(:foo) { FooClass.new }
 
-    before(:each) do
-      foo.define_single_val_attribute(:bar)
+    context 'when no proc is provided' do
+
+      before(:each) do
+        foo.define_single_val_attribute(:bar)
+      end
+
+      it 'creates setter and getter' do
+        foo.respond_to?(:bar).should be_true
+      end
+
+      it 'acts as getter when no argument is provided' do
+        foo.should_receive(:instance_variable_get).with('@bar')
+        foo.bar
+      end
+
+      it 'sets value of the attribute if provided' do
+        foo.should_receive(:instance_variable_set).with('@bar', 1)
+        foo.bar(1)
+      end
+
+      it 'raises error if more than one value is given' do
+        expect { foo.bar(1,2,3) }.to raise_error(ArgumentError)
+      end
+
     end
 
-    it 'creates setter and getter' do
-      foo.respond_to?(:bar).should be_true
-    end
+    context 'when a proc is provided' do
 
-    it 'acts as getter when no argument is provided' do
-      foo.should_receive(:instance_variable_get).with('@bar')
-      foo.bar
-    end
+      it 'process the value before assigning to the attribute' do
+        p = lambda { |x| x + 1}
+        foo.define_single_val_attribute(:bar, p)
+        foo.bar(1)
+        foo.bar.should == 2
+      end
 
-    it 'sets value of the attribute if provided' do
-      foo.should_receive(:instance_variable_set).with('@bar', 1)
-      foo.bar(1)
-    end
+      it 'raises error if condition check fails in proc' do
+        p = lambda { |x|
+          if x > 0
+            x + 1
+          else
+            raise ArgumentError
+          end
+        }
+        foo.define_single_val_attribute(:bar, p)
+        foo.bar(1)
+        foo.bar.should == 2
+        expect { foo.bar(0) }.to raise_error(ArgumentError)
+      end
 
-    it 'raises error if more than one value is given' do
-      expect { foo.bar(1,2,3) }.to raise_error(ArgumentError)
     end
 
   end
@@ -186,32 +215,54 @@ describe 'Base' do
 
     let(:foo) { FooClass.new }
 
-    before(:each) do
-      foo.define_multi_val_attribute(:bar)
+    context 'when no proc is provided' do
+
+      before(:each) do
+        foo.define_multi_val_attribute(:bar)
+      end
+
+      it 'creates setter and getter' do
+        foo.respond_to?(:bar).should be_true
+      end
+
+      it 'acts as getter when no argument is provided' do
+        foo.should_receive(:instance_variable_get).with('@bar')
+        foo.bar
+      end
+
+      it 'sets single value of the attribute if provided' do
+        foo.should_receive(:instance_variable_set).with('@bar', [1])
+        foo.bar(1)
+      end
+
+      it 'sets array of values' do
+        foo.should_receive(:instance_variable_set).with('@bar', [1, 2, 3])
+        foo.bar([1, 2, 3])
+      end
+
+      it 'sets multiple values' do
+        foo.should_receive(:instance_variable_set).with('@bar', [1, 2, 3])
+        foo.bar(1,2,3)
+      end
+
     end
 
-    it 'creates setter and getter' do
-      foo.respond_to?(:bar).should be_true
-    end
+    context 'when a proc is provided' do
 
-    it 'acts as getter when no argument is provided' do
-      foo.should_receive(:instance_variable_get).with('@bar')
-      foo.bar
-    end
+      it 'process the values before assigning to the attribute' do
+        p = lambda { |*x| x.each { |v| v + 1 } }
+        foo.define_multi_val_attribute(:bar, p)
+        foo.bar(1,2,3)
+        foo.bar.should == [1, 2, 3]
+      end
 
-    it 'sets single value of the attribute if provided' do
-      foo.should_receive(:instance_variable_set).with('@bar', [1])
-      foo.bar(1)
-    end
-
-    it 'sets array of values' do
-      foo.should_receive(:instance_variable_set).with('@bar', [1, 2, 3])
-      foo.bar([1, 2, 3])
-    end
-
-    it 'sets multiple values' do
-      foo.should_receive(:instance_variable_set).with('@bar', [1, 2, 3])
-      foo.bar(1,2,3)
+      it 'is able to check argument size' do
+        p = lambda { |x, y, z| [x + 1, y + 1, z + 1] }
+        foo.define_multi_val_attribute(:bar, p)
+        foo.bar(1,2,3)
+        foo.bar.should == [2, 3, 4]
+        expect { foo.bar(1,2,3,4) }.to raise_error(ArgumentError)
+      end
     end
 
   end

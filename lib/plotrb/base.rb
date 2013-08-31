@@ -92,14 +92,16 @@ module Plotrb
       methods.each { |m| define_boolean_attribute(m) }
     end
 
-    def define_single_val_attribute(method)
+    def define_single_val_attribute(method, proc=nil)
       # when only single value is allowed, eg. foo.bar(1)
+      # proc is passed in to process value before assigning to attributes
       define_singleton_method(method) do |*args, &block|
         case args.size
           when 0
             self.instance_variable_get("@#{method}")
           when 1
-            self.instance_variable_set("@#{method}", args[0])
+            val = proc.is_a?(Proc) ? proc.call(args[0]) : args[0]
+            self.instance_variable_set("@#{method}", val)
             self.instance_eval(&block) if block
             self
           else
@@ -112,14 +114,16 @@ module Plotrb
       methods.each { |m| define_single_val_attribute(m) }
     end
 
-    def define_multi_val_attribute(method)
+    def define_multi_val_attribute(method, proc=nil)
       # when multiple values are allowed, eg. foo.bar(1,2) or foo.bar([1,2])
+      # proc is passed in to process values before assigning to attributes
       define_singleton_method(method) do |*args, &block|
         case args.size
           when 0
             self.instance_variable_get("@#{method}")
           else
-            self.instance_variable_set("@#{method}", [args].flatten)
+            vals = proc.is_a?(Proc) ? proc.call(*args) : [args].flatten
+            self.instance_variable_set("@#{method}", vals)
             self.instance_eval(&block) if block
             self
         end
