@@ -5,6 +5,7 @@ module Plotrb
   class Visualization
 
     include ::Plotrb::Base
+    include ::Plotrb::Kernel
 
     # @!attributes name
     #   @return [String] the name of the visualization
@@ -37,30 +38,12 @@ module Plotrb
       self.instance_eval(&block) if block_given?
     end
 
-    def method_missing(method, *args, &block)
-      if method.to_s =~ /^(\w+)_scale$/
-        ::Plotrb::Scale.new(type: $1.to_sym)
-      elsif method.to_s =~ /^(x|y)_axis$/
-        ::Plotrb::Axis.new(type: $1.to_sym)
-      else
-        super
-      end
-    end
-
     def generate_spec(format=nil)
       if format == :pretty
         JSON.pretty_generate(self.collect_attributes)
       else
         JSON.generate(self.collect_attributes)
       end
-    end
-
-    def x_axis
-      ::Plotrb::Axis.new(:x)
-    end
-
-    def y_axis
-      ::Plotrb::Axis.new(:y)
     end
 
   end
