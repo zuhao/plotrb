@@ -15,29 +15,8 @@ module Plotrb
       end
     end
 
-    # @!attributes name
-    #   @return [String] the name of the scale
     # @!attributes type
     #   @return [Symbol] the type of the scale
-    # @!attributes domain
-    #   @return [Array(Numeric, Numeric), Array, String] the domain of the
-    #     scale, representing the set of data values
-    # @!attributes domain_min
-    #   @return [Numeric, String] the minimum value in the scale domain
-    # @!attributes domain_max
-    #   @return [Numeric, String] the maximum value in the scale domain
-    # @!attributes range
-    #   @return [Array(Numeric, Numeric), Array, String] the range of the
-    #     scale, representing the set of visual values
-    # @!attributes range_min
-    #   @return [Numeric, String] the minimum value in the scale range
-    # @!attributes range_max
-    #   @return [Numeric, String] the maximum value in the scale range
-    # @!attributes reverse
-    #   @return [Boolean] whether flips the scale range
-    # @!attributes round
-    #   @return [Boolean] whether rounds numeric output values to integers
-
     SCALE_PROPERTIES = [:name, :type, :domain, :domain_min, :domain_max, :range,
                         :range_min, :range_max, :reverse, :round]
 
@@ -56,106 +35,13 @@ module Plotrb
         else
           self.send(:quantitative_scale)
       end
-      define_single_val_attributes :name
-      define_boolean_attributes :reverse, :round
+      set_common_scale_attributes
       self.instance_eval(&block) if block_given?
       self
     end
 
     def type
       @type
-    end
-
-    def domain(*args, &block)
-      case args.size
-        when 0
-          @domain
-        when 1
-          @domain = parse_domain(args[0])
-          self.instance_eval(&block) if block_given?
-          self
-        when 3
-          @domain = parse_domain(args[0])
-          @domain_min = parse_domain(args[1])
-          @domain_max = parse_domain(args[2])
-          self.instance_eval(&block) if block_given?
-          self
-        else
-          raise ArgumentError
-      end
-    end
-    alias_method :from, :domain
-
-    def domain_min(*args, &block)
-      case args.size
-        when 0
-          @domain_min
-        when 1
-          @domain_min = parse_domain(args[0])
-          self.instance_eval(&block) if block_given?
-          self
-        else
-          raise ArgumentError
-      end
-    end
-
-    def domain_max(*args, &block)
-      case args.size
-        when 0
-          @domain_max
-        when 1
-          @domain_max = parse_domain(args[0])
-          self.instance_eval(&block) if block_given?
-          self
-        else
-          raise ArgumentError
-      end
-    end
-
-    def range(*args, &block)
-      case args.size
-        when 0
-          @range
-        when 1
-          @range = parse_range(args[0])
-          self.instance_eval(&block) if block_given?
-          self
-        when 3
-          @range = parse_range(args[0])
-          @range_min = parse_range(args[1])
-          @range_max = parse_range(args[2])
-          self.instance_eval(&block) if block_given?
-          self
-        else
-          raise ArgumentError
-      end
-    end
-    alias_method :to, :range
-
-    def range_min(*args, &block)
-      case args.size
-        when 0
-          @range_min
-        when 1
-          @range_min = parse_domain(args[0])
-          self.instance_eval(&block) if block_given?
-          self
-        else
-          raise ArgumentError
-      end
-    end
-
-    def range_max(*args, &block)
-      case args.size
-        when 0
-          @range_max
-        when 1
-          @range_max = parse_domain(args[0])
-          self.instance_eval(&block) if block_given?
-          self
-        else
-          raise ArgumentError
-      end
     end
 
     def method_missing(method, *args, &block)
@@ -178,6 +64,46 @@ module Plotrb
     end
 
   private
+
+    def set_common_scale_attributes
+      # @!attributes name
+      #   @return [String] the name of the scale
+      # @!attributes domain
+      #   @return [Array(Numeric, Numeric), Array, String] the domain of the
+      #     scale, representing the set of data values
+      # @!attributes domain_min
+      #   @return [Numeric, String] the minimum value in the scale domain
+      # @!attributes domain_max
+      #   @return [Numeric, String] the maximum value in the scale domain
+      # @!attributes range
+      #   @return [Array(Numeric, Numeric), Array, String] the range of the
+      #     scale, representing the set of visual values
+      # @!attributes range_min
+      #   @return [Numeric, String] the minimum value in the scale range
+      # @!attributes range_max
+      #   @return [Numeric, String] the maximum value in the scale range
+      # @!attributes reverse
+      #   @return [Boolean] whether flips the scale range
+      # @!attributes round
+      #   @return [Boolean] whether rounds numeric output values to integers
+      define_single_val_attributes :name
+      define_boolean_attributes :reverse, :round
+
+      proc_domain = lambda { |d| parse_domain(d) }
+      define_single_val_attribute(:domain, proc_domain)
+      define_single_val_attribute(:domain_max, proc_domain)
+      define_single_val_attribute(:domain_min, proc_domain)
+
+      proc_range = lambda { |r| parse_range(r) }
+      define_single_val_attribute(:range, proc_range)
+      define_single_val_attribute(:range_max, proc_range)
+      define_single_val_attribute(:range_min, proc_range)
+
+      self.singleton_class.class_eval {
+        alias_method :from, :domain
+        alias_method :to, :range
+      }
+    end
 
     def ordinal_scale
       # @!attributes points
@@ -247,9 +173,9 @@ module Plotrb
         when String
           source, field = domain.split('.', 2)
           if field.nil? || field == 'index'
-            ::Plotrb::DataRef.new.data(source).field('index')
+            ::Plotrb::Scale::DataRef.new.data(source).field('index')
           else
-            ::Plotrb::DataRef.new.data.(source).field("data.#{field}")
+            ::Plotrb::Scale::DataRef.new.data(source).field("data.#{field}")
           end
         else
           domain
@@ -305,12 +231,13 @@ module Plotrb
           if f.nil? || f == 'index'
             'index'
           else
-            "data.#{f}"
+            f
           end
         }
         define_single_val_attribute(:data, data_proc)
         define_single_val_attribute(:field, field_proc)
         self.instance_eval(&block) if block
+        self
       end
 
     end
