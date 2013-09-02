@@ -7,7 +7,7 @@ describe 'Scale' do
   describe '#name' do
 
     it 'sets name of the scale' do
-      subject.name = 'foo_scale'
+      subject.name 'foo_scale'
       subject.name.should == 'foo_scale'
     end
 
@@ -17,12 +17,9 @@ describe 'Scale' do
 
   describe '#type' do
 
-    it 'sets type of the scale' do
-      subject.type = :linear
-      subject.type.should == :linear
+    it 'does not allow changing type once initialized' do
+      expect { subject.type(:other_type) }.to raise_error(ArgumentError)
     end
-
-    it 'raises error if type is unrecognized'
 
   end
 
@@ -30,18 +27,18 @@ describe 'Scale' do
 
     context 'when domain is a string reference to a data source' do
 
-      let(:data_ref) { ::Plotrb::DataRef }
+      let(:data_ref) { ::Plotrb::Scale::DataRef }
 
       it 'separates data source and data field' do
-        data_ref.should_receive(:new).
-            with(data: 'some_data', field: 'data.some_field')
         subject.from('some_data.some_field')
+        subject.domain.data.should == 'some_data'
+        subject.domain.field.should == 'data.some_field'
       end
 
       it 'defaults field to index if not provided' do
-        data_ref.should_receive(:new).
-            with(data: 'some_data', field: 'index')
         subject.from('some_data')
+        subject.domain.data.should == 'some_data'
+        subject.domain.field.should == 'index'
       end
 
     end
@@ -63,16 +60,6 @@ describe 'Scale' do
         subject.domain.should == [1,100]
       end
 
-    end
-
-    it 'sets domain_min and domain_max if both provided' do
-      subject.domain('some_data', 1, 100)
-      subject.domain_min.should == 1
-      subject.domain_max.should == 100
-    end
-
-    it 'raises error if only one of min/max is provided' do
-      expect { subject.domain('some_data', 1) }.to raise_error(ArgumentError)
     end
 
   end
@@ -116,16 +103,6 @@ describe 'Scale' do
 
     end
 
-    it 'sets range_min and range_max if both provided' do
-      subject.range([0, 200], 1, 100)
-      subject.range_min.should == 1
-      subject.range_max.should == 100
-    end
-
-    it 'raises error if only one of min/max is provided' do
-      expect { subject.range([0, 100], 1) }.to raise_error(ArgumentError)
-    end
-
   end
 
   describe '#exponent' do
@@ -141,9 +118,7 @@ describe 'Scale' do
 
     context 'when scale is time or utc' do
 
-      before(:each) do
-        subject.type = :time
-      end
+      subject { ::Plotrb::Scale.time }
 
       it 'sets valid nice literal' do
         subject.in_seconds
@@ -159,8 +134,9 @@ describe 'Scale' do
 
     context 'when scale is quantitative' do
 
+      subject { ::Plotrb::Scale.linear }
+
       it 'sets nice to true' do
-        subject.type = :linear
         subject.nicely
         subject.nice?.should be_true
       end
@@ -186,18 +162,16 @@ describe 'Scale' do
 
   it 'allows block-style DSL' do
     subject.name('some_scale') do
-      type :time
       from('some_data_file.some_field').to_width
       reverse
-      in_seconds
+      nicely
     end
     subject.name.should == 'some_scale'
-    subject.type.should == :time
     subject.domain.data.should == 'some_data_file'
     subject.domain.field.should == 'data.some_field'
     subject.range.should == :width
     subject.reverse.should be_true
-    subject.nice.should == :second
+    subject.nice?.should be_true
   end
 
 end
