@@ -16,3 +16,9 @@ require_relative 'plotrb/visualization'
 module Plotrb
 
 end
+
+class Object
+
+  include ::Plotrb::Kernel
+
+end
