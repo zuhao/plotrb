@@ -20,10 +20,7 @@ module Plotrb
     #   @return [Array<Transform>] an array of transform definitions
     add_attributes :name, :format, :values, :source, :url, :transform
 
-    def initialize(args={}, &block)
-      args.each do |k, v|
-        self.instance_variable_set("@#{k}", v) if self.attributes.include?(k)
-      end
+    def initialize(&block)
       self.instance_eval(&block) if block_given?
       self
     end
@@ -41,16 +38,12 @@ module Plotrb
       end
     end
 
-    def to_s
-      @name
-    end
-
     def format(*args, &block)
       case args.size
         when 0
           @format
         when 1
-          @format = Format.new(args[0].to_sym, &block)
+          @format = ::Plotrb::Data::Format.new(args[0].to_sym, &block)
           self
         else
           raise ArgumentError
