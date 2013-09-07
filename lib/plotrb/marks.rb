@@ -44,6 +44,7 @@ module Plotrb
       @properties = {}
       define_single_val_attributes *(MARK_PROPERTIES - [:type, :properties])
       self.instance_eval(&block) if block_given?
+      self
     end
 
     def type
@@ -226,9 +227,13 @@ module Plotrb
         define_single_val_attributes *VISUAL_PROPERTIES
         self.singleton_class.class_eval {
           alias_method :x_start, :x
+          alias_method :left, :x
           alias_method :x_end, :x2
+          alias_method :right, :x2
           alias_method :y_start, :y
+          alias_method :top, :y
           alias_method :y_end, :y2
+          alias_method :bottom, :y2
         }
         self.instance_eval(&block) if block_given?
       end
