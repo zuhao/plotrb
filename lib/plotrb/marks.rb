@@ -43,6 +43,7 @@ module Plotrb
       self.send(@type)
       @properties = {}
       define_single_val_attributes *(MARK_PROPERTIES - [:type, :properties])
+      ::Plotrb::Kernel.marks << self
       self.instance_eval(&block) if block_given?
       self
     end

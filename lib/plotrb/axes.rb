@@ -57,6 +57,7 @@ module Plotrb
 
     def initialize(type, &block)
       @type = type
+      ::Plotrb::Kernel.axes << self
       self.instance_eval(&block) if block_given?
       self
     end

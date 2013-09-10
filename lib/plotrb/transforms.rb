@@ -25,6 +25,7 @@ module Plotrb
     def initialize(type, &block)
       @type = type
       self.send(@type)
+      ::Plotrb::Kernel.transforms << self
       self.instance_eval(&block) if block_given?
     end
 

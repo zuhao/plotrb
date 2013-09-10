@@ -36,6 +36,7 @@ module Plotrb
           self.send(:quantitative_scale)
       end
       set_common_scale_attributes
+      ::Plotrb::Kernel.scales << self
       self.instance_eval(&block) if block_given?
       self
     end

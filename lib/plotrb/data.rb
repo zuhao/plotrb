@@ -21,6 +21,7 @@ module Plotrb
     add_attributes :name, :format, :values, :source, :url, :transform
 
     def initialize(&block)
+      ::Plotrb::Kernel.data << self
       self.instance_eval(&block) if block_given?
       self
     end
@@ -172,7 +173,7 @@ module Plotrb
           else
             raise ArgumentError
         end
-        @format = format
+        @type = format
         self.instance_eval(&block) if block_given?
         self
       end
