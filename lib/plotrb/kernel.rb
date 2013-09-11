@@ -28,6 +28,11 @@ module Plotrb
       @scales ||= []
     end
 
+    # @return [Scale] find Scale object by name
+    def self.find_scale(name)
+      @scales.find { |s| s.name == name.to_s }
+    end
+
     # a global space keeping track of all Mark objects defined
     def self.marks
       @marks ||= []
