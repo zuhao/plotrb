@@ -8,6 +8,16 @@ module Plotrb
       @data ||= []
     end
 
+    # @return [Data] find Data object by name
+    def self.find_data(name)
+      @data.find { |d| d.name == name.to_s }
+    end
+
+    # @return [Boolean] if a Data object with same name already exists
+    def self.duplicate_data?(name)
+      @data.select { |d| d.name == name.to_s }.size > 1
+    end
+
     # a global space keeping track of all Axis objects defined
     def self.axes
       @axes ||= []
