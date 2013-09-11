@@ -2,11 +2,14 @@ require_relative '../spec_helper'
 
 describe 'Axis' do
 
-  subject { ::Plotrb::Axis.new(type: :x) }
+  subject { ::Plotrb::Axis.new(:x) }
 
   describe '#type' do
 
-    it 'only allows x or y as scale type'
+    it 'raises error if type is neither x or y' do
+      subject.instance_variable_set(:@type, :foo)
+      expect { subject.send(:process_type) }.to raise_error(ArgumentError)
+    end
 
   end
 
@@ -20,7 +23,14 @@ describe 'Axis' do
     it 'sets the scale backing the axis by the scale object' do
       scale = ::Plotrb::Scale.new.name('foo_scale')
       subject.from(scale)
+      subject.send(:process_scale)
       subject.scale.should == 'foo_scale'
+    end
+
+    it 'raises error if scale is not found' do
+      subject.from('foo_scale')
+      ::Plotrb::Kernel.stub(:find_scale).and_return(nil)
+      expect { subject.send(:process_scale) }.to raise_error(ArgumentError)
     end
 
   end
@@ -41,12 +51,6 @@ describe 'Axis' do
       subject.title.should == 'foo'
     end
 
-    it 'sets title and offset of the axis' do
-      subject.title('foo', 5)
-      subject.title.should == 'foo'
-      subject.title_offset.should == 5
-    end
-
   end
 
   describe '#title_offset' do
@@ -60,7 +64,15 @@ describe 'Axis' do
 
   describe 'format' do
 
-    it 'checks if the format specification is valid'
+    it 'accepts valid format specifier' do
+      subject.format('04d')
+      expect { subject.send(:process_format) }.to_not raise_error(ArgumentError)
+    end
+
+    it 'raises error if format specifier is invalid' do
+      subject.format('{$s04d,g')
+      expect { subject.send(:process_format) }.to raise_error(ArgumentError)
+    end
 
   end
 
@@ -210,20 +222,6 @@ describe 'Axis' do
       subject.layer.should == :front
     end
 
-  end
-
-  it 'allows block-style DSL' do
-    subject.from('some_scale').at_bottom do
-      layer :front
-      with_20_ticks.subdivide_by 5
-      show_grid
-    end
-    subject.scale.should == 'some_scale'
-    subject.orient.should == :bottom
-    subject.layer.should == :front
-    subject.ticks.should == 20
-    subject.subdivide.should == 5
-    subject.grid.should be_true
   end
 
 end
