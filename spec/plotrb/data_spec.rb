@@ -7,13 +7,23 @@ describe 'Data' do
   describe '#name' do
 
     it 'sets name if valid' do
-      subject.name = 'foo'
+      subject.name('foo')
       subject.name.should == 'foo'
     end
 
-    it 'raises error if name is nil'
+    it 'raises error if name is nil' do
+      expect { subject.send(:process_name) }.to raise_error(ArgumentError)
+    end
 
-    it 'raises error if name is not unique'
+    it 'raises error if name in blank' do
+      subject.name = '    '
+      expect { subject.send(:process_name) }.to raise_error(ArgumentError)
+    end
+
+    it 'raises error if name is not unique' do
+      ::Plotrb::Kernel.stub(:duplicate_data?).and_return(false)
+      expect { subject.send(:process_name) }.to raise_error(ArgumentError)
+    end
 
   end
 
@@ -44,7 +54,8 @@ describe 'Data' do
     end
 
     it 'raises error if values are invalid JSON' do
-      expect { subject.values("{foo:1, 'bar':}") }.to raise_error ArgumentError
+      subject.values("{foo:1, 'bar':}")
+      expect { subject.send(:process_values) }.to raise_error ArgumentError
     end
 
   end
@@ -56,9 +67,18 @@ describe 'Data' do
       subject.source.should == 'foo'
     end
 
-    it 'raises error if source does not exist'
+    it 'raises error if source does not exist' do
+      ::Plotrb::Kernel.stub(:find_data).and_return(false)
+      subject.source('foo')
+      expect { subject.send(:process_source) }.to raise_error ArgumentError
+    end
 
-    it 'validates existing source'
+    it 'gets the name of the existing data object' do
+      foo = ::Plotrb::Data.new.name('foo')
+      subject.source(foo)
+      subject.send(:process_source)
+      subject.source.should == 'foo'
+    end
 
   end
 
@@ -75,7 +95,8 @@ describe 'Data' do
     end
 
     it 'raises error when url is invalid' do
-      expect { subject.url('http://foo/#-|r|$@') }.to raise_error ArgumentError
+      subject.url('http://foo/#-|r|$@')
+      expect { subject.send(:process_url) }.to raise_error ArgumentError
     end
 
   end
@@ -106,7 +127,8 @@ describe 'Data' do
     end
 
     it 'raises error if array contains non-transforms' do
-      expect { subject.transform(foo, bar) }.to raise_error ArgumentError
+      subject.transform(foo, bar)
+      expect { subject.send(:process_transform) }.to raise_error ArgumentError
     end
 
   end
@@ -131,7 +153,7 @@ describe 'Data' do
       subject { ::Plotrb::Data::Format.new(:json) }
 
       it 'has parse and property attributes' do
-        subject.attributes.should match_array([:format, :parse, :property])
+        subject.attributes.should match_array([:type, :parse, :property])
       end
 
       describe '#parse' do
@@ -142,7 +164,8 @@ describe 'Data' do
         end
 
         it 'raises error if parse object has unknown data type' do
-          expect { subject.parse('foo' => :bar) }.to raise_error ArgumentError
+          subject.parse('foo' => :bar)
+          expect { subject.send(:process_parse) }.to raise_error ArgumentError
         end
 
       end
@@ -195,7 +218,7 @@ describe 'Data' do
       subject { ::Plotrb::Data::Format.new(:csv) }
 
       it 'has parse attribute' do
-        subject.attributes.should match_array([:format, :parse])
+        subject.attributes.should match_array([:type, :parse])
       end
 
     end
@@ -205,7 +228,7 @@ describe 'Data' do
       subject { ::Plotrb::Data::Format.new(:tsv) }
 
       it 'has parse attribute' do
-        subject.attributes.should match_array([:format, :parse])
+        subject.attributes.should match_array([:type, :parse])
       end
 
     end
@@ -215,7 +238,7 @@ describe 'Data' do
       subject { ::Plotrb::Data::Format.new(:topojson) }
 
       it 'has feature and mesh attribute' do
-        subject.attributes.should match_array([:format, :feature, :mesh])
+        subject.attributes.should match_array([:type, :feature, :mesh])
       end
 
     end
@@ -225,7 +248,7 @@ describe 'Data' do
       subject { ::Plotrb::Data::Format.new(:treejson) }
 
       it 'has parse and children attribute' do
-        subject.attributes.should match_array([:format, :parse, :children])
+        subject.attributes.should match_array([:type, :parse, :children])
       end
 
     end

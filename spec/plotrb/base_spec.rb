@@ -106,6 +106,7 @@ describe 'Base' do
     let(:baz) { BazClass.new }
     before(:each) do
       foo.add_attributes(:attr)
+      foo.stub(:attribute_post_processing)
     end
 
     it 'recursively collects attributes' do
@@ -126,8 +127,6 @@ describe 'Base' do
       foo.attr = [bar, baz]
       foo.collect_attributes.should == { 'attr' => %w(bar_values baz_values)}
     end
-
-    it 'collects name reference if an object in given'
 
   end
 
