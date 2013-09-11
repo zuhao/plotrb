@@ -43,6 +43,11 @@ module Plotrb
       end
     end
 
+    def extra_fields
+      @extra_fields ||= []
+      @extra_fields.concat(@transform.collect { |t| t.extra_fields }).uniq!
+    end
+
     def method_missing(method, *args, &block)
       case method.to_s
         # set format of the data

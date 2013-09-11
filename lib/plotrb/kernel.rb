@@ -33,6 +33,11 @@ module Plotrb
       @scales.find { |s| s.name == name.to_s }
     end
 
+    # @return [Boolean] if a Scale object with same name already exists
+    def self.duplicate_scale?(name)
+      @scales.select { |s| s.name == name.to_s }.size > 1
+    end
+
     # a global space keeping track of all Mark objects defined
     def self.marks
       @marks ||= []

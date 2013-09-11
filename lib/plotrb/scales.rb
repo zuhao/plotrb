@@ -29,11 +29,11 @@ module Plotrb
       @type = type
       case @type
         when :ordinal
-          self.send(:ordinal_scale)
+          set_ordinal_scale_attributes
         when :time, :utc
-          self.send(:time_scale)
+          set_time_scale_attributes
         else
-          self.send(:quantitative_scale)
+          set_quantitative_scale_attributes
       end
       set_common_scale_attributes
       ::Plotrb::Kernel.scales << self
@@ -87,26 +87,16 @@ module Plotrb
       #   @return [Boolean] whether flips the scale range
       # @!attributes round
       #   @return [Boolean] whether rounds numeric output values to integers
-      define_single_val_attributes :name
-      define_boolean_attributes :reverse, :round
-
-      proc_domain = lambda { |d| parse_domain(d) }
-      define_single_val_attribute(:domain, proc_domain)
-      define_single_val_attribute(:domain_max, proc_domain)
-      define_single_val_attribute(:domain_min, proc_domain)
-
-      proc_range = lambda { |r| parse_range(r) }
-      define_single_val_attribute(:range, proc_range)
-      define_single_val_attribute(:range_max, proc_range)
-      define_single_val_attribute(:range_min, proc_range)
-
+      define_single_val_attributes(:name, :domain, :domain_max, :domain_min,
+                                   :range, :range_max, :range_min)
+      define_boolean_attributes(:reverse, :round)
       self.singleton_class.class_eval {
         alias_method :from, :domain
         alias_method :to, :range
       }
     end
 
-    def ordinal_scale
+    def set_ordinal_scale_attributes
       # @!attributes points
       #   @return [Boolean] whether distributes the ordinal values over a
       #     quantitative range at uniformly spaced points or bands
@@ -115,18 +105,18 @@ module Plotrb
       # @!attributes sort
       #   @return [Boolean] whether values in the scale domain will be sorted
       #     according to their natural order
-      add_attributes :points, :padding, :sort
-      define_boolean_attributes :points, :sort
-      define_single_val_attribute :padding
+      add_attributes(:points, :padding, :sort)
+      define_boolean_attributes(:points, :sort)
+      define_single_val_attribute(:padding)
+      define_singleton_method(:bands) do |&block|
+        @points = false
+        self.instance_eval(&block) if block
+        self
+      end
+      define_singleton_method(:bands?) do
+        !@points
+      end
       self.singleton_class.class_eval {
-        def bands(&block)
-          @points = false
-          self.instance_eval(&block) if block
-          self
-        end
-        def bands?
-          !@points
-        end
         alias_method :as_bands, :bands
         alias_method :as_bands?, :bands?
         alias_method :as_points, :points
@@ -134,19 +124,19 @@ module Plotrb
       }
     end
 
-    def time_scale
+    def set_time_scale_attributes
       # @!attributes clamp
       #   @return [Boolean] whether clamps values that exceed the data domain
       #     to either to minimum or maximum range value
       # @!attributes nice
       #   @return [Symbol, Boolean, nil] scale domain in a more human-friendly
       #     value range
-      add_attributes :clamp, :nice
-      define_boolean_attribute :clamp
-      define_single_val_attribute :nice
+      add_attributes(:clamp, :nice)
+      define_boolean_attribute(:clamp)
+      define_single_val_attribute(:nice)
     end
 
-    def quantitative_scale
+    def set_quantitative_scale_attributes
       # @!attributes clamp
       #   @return [Boolean] whether clamps values that exceed the data domain
       #     to either to minimum or maximum range value
@@ -157,9 +147,17 @@ module Plotrb
       #   @return [Numeric] the exponent of the scale transformation
       # @!attributes zero
       #   @return [Boolean] whether zero baseline value is included
-      add_attributes :clamp, :exponent, :nice, :zero
-      define_boolean_attributes :clamp, :nice, :zero
-      define_single_val_attribute :exponent
+      add_attributes(:clamp, :exponent, :nice, :zero)
+      define_boolean_attributes(:clamp, :nice, :zero)
+      define_single_val_attribute(:exponent)
+      define_singleton_method(:exclude_zero) do |&block|
+        @zero = false
+        self.instance_eval(&block) if block
+        self
+      end
+      define_singleton_method(:exclude_zero?) do
+        !@zero
+      end
       self.singleton_class.class_eval {
         alias_method :nicely, :nice
         alias_method :nicely?, :nice?
@@ -169,26 +167,133 @@ module Plotrb
       }
     end
 
-    def parse_domain(domain)
-      case domain
-        when String
-          source, field = domain.split('.', 2)
-          if field.nil? || field == 'index'
-            ::Plotrb::Scale::DataRef.new.data(source).field('index')
-          else
-            ::Plotrb::Scale::DataRef.new.data(source).field("data.#{field}")
-          end
-        else
-          domain
+    def attribute_post_processing
+      process_name
+      process_type
+      process_domain
+      process_domain_min
+      process_domain_max
+      process_range
+    end
+
+    def process_name
+      if @name.nil? || @name.strip.empty?
+        raise ArgumentError, 'Name missing for Scale object'
+      end
+      if ::Plotrb::Kernel.duplicate_scale?(@name)
+        raise ArgumentError, 'Duplicate names for Scale object'
       end
     end
 
-    def parse_range(range)
-      case range
-        when String, Symbol
-          range_literal(range.to_sym)
+    def process_type
+      unless TYPES.include?(@type)
+        raise ArgumentError, 'Invalid Scale type'
+      end
+    end
+
+    def process_domain
+      return unless @domain
+      case @domain
+        when String
+          @domain = get_data_ref_from_string(@domain)
+        when ::Plotrb::Data
+          @domain = get_data_ref_from_data(@domain)
+        when Array
+          if @domain.all? { |d| is_data_ref?(d) }
+            fields = @domain.collect { |d| get_data_ref_from_string(d) }
+            @domain = {:fields => fields}
+          else
+            # leave as it is
+          end
         else
-          range
+          raise ArgumentError, 'Unsupported Scale domain type'
+      end
+    end
+
+    def process_domain_min
+      return unless @domain_min && !%i(ordinal time utc).include?(@type)
+      case @domain_min
+        when String
+          @domain_min = get_data_ref_from_string(@domain_min)
+        when ::Plotrb::Data
+          @domain_min = get_data_ref_from_data(@domain_min)
+        when Array
+          if @domain_min.all? { |d| is_data_ref?(d) }
+            fields = @domain_min.collect { |d| get_data_ref_from_string(d) }
+            @domain_min = {:fields => fields}
+          else
+            raise ArgumentError, 'Unsupported Scale domain_min type'
+          end
+        when Numeric
+          # leave as it is
+        else
+          raise ArgumentError, 'Unsupported Scale domain_min type'
+      end
+    end
+
+    def process_domain_max
+      return unless @domain_max && !%i(ordinal time utc).include?(@type)
+      case @domain_max
+        when String
+          @domain_max = get_data_ref_from_string(@domain_max)
+        when ::Plotrb::Data
+          @domain_max = get_data_ref_from_data(@domain_max)
+        when Array
+          if @domain_max.all? { |d| is_data_ref?(d) }
+            fields = @domain_max.collect { |d| get_data_ref_from_string(d) }
+            @domain_max = {:fields => fields}
+          else
+            raise ArgumentError, 'Unsupported Scale domain_max type'
+          end
+        when Numeric
+          # leave as it is
+        else
+          raise ArgumentError, 'Unsupported Scale domain_max type'
+      end
+    end
+
+    def get_data_ref_from_string(ref)
+      source, field = ref.split('.', 2)
+      data = ::Plotrb::Kernel.find_data(source)
+      if field.nil?
+        if data && data.values.is_a?(Array)
+          ::Plotrb::Scale::DataRef.new.data(source).field('data')
+        else
+          ::Plotrb::Scale::DataRef.new.data(source).field('index')
+        end
+      elsif field == 'index'
+        ::Plotrb::Scale::DataRef.new.data(source).field('index')
+      else
+        if data.extra_fields.include?(field.to_sym)
+          ::Plotrb::Scale::DataRef.new.data(source).field(field)
+        else
+          ::Plotrb::Scale::DataRef.new.data(source).field("data.#{field}")
+        end
+      end
+    end
+
+    def get_data_ref_from_data(data)
+      if data.values.is_a?(Array)
+        ::Plotrb::Scale::DataRef.new.data(data.name).field('data')
+      else
+        ::Plotrb::Scale::DataRef.new.data(data.name).field('index')
+      end
+    end
+
+    def is_data_ref?(ref)
+      source, _ = ref.split('.', 2)
+      not ::Plotrb::Kernel.find_data(source).nil?
+    end
+
+    def process_range
+      return unless @range
+      case @range
+        when String, Symbol
+          @range = range_literal(@range)
+        when Array
+          #leave as it is
+        else
+          raise ArgumentError, 'Unsupported Scale range type'
       end
     end
 
@@ -198,10 +303,10 @@ module Plotrb
           :category10
         when :more_colors
           :category20
-        when :width, :height, :shapes
+        when :width, :height, :shapes, :category10, :category20
           literal
         else
-          raise ArgumentError
+          raise ArgumentError, 'Invalid Scale range'
       end
     end
 
@@ -218,27 +323,15 @@ module Plotrb
 
       # TODO: Support group
       def initialize(&block)
-        data_proc = lambda { |d|
-          case d
-            when String
-              d
-            when ::Plotrb::Data
-              d.name
-            else
-              raise ArgumentError
-          end
-        }
-        field_proc = lambda { |f|
-          if f.nil? || f == 'index'
-            'index'
-          else
-            f
-          end
-        }
-        define_single_val_attribute(:data, data_proc)
-        define_single_val_attribute(:field, field_proc)
+        define_single_val_attributes(:data, :field)
         self.instance_eval(&block) if block
         self
+      end
+
+    private
+
+      def attribute_post_processing
+
       end
 
     end
