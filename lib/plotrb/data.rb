@@ -9,11 +9,11 @@ module Plotrb
     # @!attributes name
     #   @return [String] the name of the data set
     # @!attributes format
-    #   @return [Hash] the format of the data file
+    #   @return [Format] the format of the data file
     # @!attributes values
-    #   @return [Hash] the actual data set
+    #   @return [Hash, Array, String] the actual data set
     # @!attributes source
-    #   @return [String] the name of another data set to use as source
+    #   @return [String, Data] the name of another data set to use as source
     # @!attributes url
     #   @return [String] the url from which to load the data set
     # @!attributes transform
@@ -21,22 +21,14 @@ module Plotrb
     add_attributes :name, :format, :values, :source, :url, :transform
 
     def initialize(&block)
-      ::Plotrb::Kernel.data << self
+      define_single_val_attributes(:name, :values, :source, :url)
+      define_multi_val_attribute(:transform)
+      self.singleton_class.class_eval {
+        alias_method :file, :url
+      }
       self.instance_eval(&block) if block_given?
+      ::Plotrb::Kernel.data << self
       self
-    end
-
-    def name(*args, &block)
-      case args.size
-        when 0
-          @name
-        when 1
-          @name = args[0].to_s
-          self.instance_eval(&block) if block_given?
-          self
-        else
-          raise ArgumentError
-      end
     end
 
     def format(*args, &block)
@@ -47,64 +39,14 @@ module Plotrb
           @format = ::Plotrb::Data::Format.new(args[0].to_sym, &block)
           self
         else
-          raise ArgumentError
-      end
-    end
-
-    def values(*args, &block)
-      case args.size
-        when 0
-          @values
-        when 1
-          @values = parse_values(args[0])
-          self.instance_eval(&block) if block_given?
-          self
-        else
-          raise ArgumentError
-      end
-    end
-
-    def source(*args, &block)
-      case args.size
-        when 0
-          @source
-        when 1
-          @source = parse_source(args[0])
-          self.instance_eval(&block) if block_given?
-          self
-        else
-          raise ArgumentError
-      end
-    end
-
-    def url(*args, &block)
-      case args.size
-        when 0
-          @url
-        when 1
-          @url = parse_url(args[0])
-          self.instance_eval(&block) if block_given?
-          self
-        else
-          raise ArgumentError
-      end
-    end
-    alias_method :file, :url
-
-    def transform(*args, &block)
-      case args.size
-        when 0
-          @transform
-        else
-          @transform = parse_transform(args)
-          self.instance_eval(&block) if block_given?
-          self
+          raise ArgumentError, 'Invalid Data format'
       end
     end
 
     def method_missing(method, *args, &block)
       case method.to_s
-        when /^as_(csv|tsv|json|topojson|treejson)$/ # set format of the data
+        # set format of the data
+        when /^as_(csv|tsv|json|topojson|treejson)$/
           self.format($1.to_sym, &block)
         else
           super
@@ -113,164 +55,164 @@ module Plotrb
 
   private
 
-    def parse_transform(transform)
-      case transform
-        when Array
-          transform.collect { |t| parse_transform(t) }.flatten
-        when ::Plotrb::Transform
-          transform
-        else
-          raise ArgumentError
+    def attribute_post_processing
+      process_name
+      process_values
+      process_source
+      process_url
+      process_transform
+    end
+
+    def process_name
+      if @name.nil? || @name.strip.empty?
+        raise ArgumentError, 'Name missing for Data object'
+      end
+      if ::Plotrb::Kernel.duplicate_data?(@name)
+        raise ArgumentError, 'Duplicate names for Data object'
       end
     end
 
-    def parse_source(source)
+    def process_values
+      return unless @values
+      case @values
+        when String
+          begin
+            Yajl::Parser.parse(@values)
+          rescue Yajl::ParseError
+            raise ArgumentError, 'Invalid JSON values in Data'
+          end
+        when Array, Hash
+          # leave as it is
+        else
+          raise ArgumentError, 'Unsupported value type in Data'
+      end
+    end
+
+    def process_source
+      return unless @source
       case source
         when String
-          source
+          unless ::Plotrb::Kernel.find_data(@source)
+            raise ArgumentError, 'Source Data not found'
+          end
         when ::Plotrb::Data
-          source.name
+          @source = @source.name
         else
-          raise ArgumentError
+          raise ArgumentError, 'Unknown Data source'
       end
     end
 
-    def parse_url(url)
-      url if URI.parse(url)
-    rescue URI::InvalidURIError
-      raise ArgumentError
+    def process_url
+      return unless @url
+      begin
+        URI.parse(@url)
+      rescue URI::InvalidURIError
+        raise ArgumentError, 'Invalid URL for Data'
+      end
     end
 
-    def parse_values(values)
-      case values
-        when String
-          values if Yajl::Parser.parse(values)
-        when Array, Hash
-          values
-        else
-          raise ArgumentError
+    def process_transform
+      return unless @transform
+      if @transform.any? { |t| not t.is_a?(::Plotrb::Transform) }
+        raise ArgumentError, 'Invalid Data Transform'
       end
-    rescue Yajl::ParseError
-      raise ArgumentError
     end
 
     class Format
 
       include ::Plotrb::Base
 
-      add_attributes :format
+      add_attributes :type
 
-      def initialize(format, &block)
-        case format
+      def initialize(type, &block)
+        case type
           when :json
             add_attributes(:parse, :property)
+            define_single_val_attributes(:parse, :property)
           when :csv, :tsv
             add_attributes(:parse)
+            define_single_val_attribute(:parse)
           when :topojson
             add_attributes(:feature, :mesh)
+            define_single_val_attributes(:feature, :mesh)
           when :treejson
-            add_attributes(:children, :parse)
+            add_attributes(:parse, :children)
+            define_single_val_attributes(:parse, :children)
           else
-            raise ArgumentError
+            raise ArgumentError, 'Invalid Data format'
         end
-        @type = format
+        @type = type
         self.instance_eval(&block) if block_given?
         self
       end
 
-      def parse(*args, &block)
-        case args.size
-          when 0
-            @parse
-          when 1
-            # e.g parse('some_field' => :date, 'some_other_field' => :number)
-            valid_type = %i(number boolean date)
-            raise NoMethodError unless self.attributes.include?(:parse)
-            raise ArgumentError unless args[0].is_a?(Hash) &&
-                (args[0].values - valid_type).empty?
-            @parse ||= {}
-            @parse.merge!(args[0])
-            self.instance_eval(&block) if block_given?
-            self
-          else
-            raise ArgumentError
-        end
-      end
-
       def date(*field, &block)
-        field.flatten.each { |f| parse(f => :date) }
+        @parse ||= {}
+        field.flatten.each { |f| @parse.merge!(f => :date) }
         self.instance_eval(&block) if block_given?
         self
       end
       alias_method :as_date, :date
 
       def number(*field, &block)
-        field.flatten.each { |f| parse(f => :number) }
+        @parse ||= {}
+        field.flatten.each { |f| @parse.merge!(f => :number) }
         self.instance_eval(&block) if block_given?
         self
       end
       alias_method :as_number, :number
 
       def boolean(*field, &block)
-        field.flatten.each { |f| parse(f => :boolean) }
+        @parse ||= {}
+        field.flatten.each { |f| @parse.merge!(f => :boolean) }
         self.instance_eval(&block) if block_given?
         self
       end
       alias_method :as_boolean, :boolean
 
-      def property(*args, &block)
-        raise NoMethodError unless self.attributes.include?(:property)
-        case args.size
-          when 0
-            @property
-          when 1
-            @property = args[0]
-            self.instance_eval(&block) if block_given?
-            self
-          else
-            raise ArgumentError
+    private
+
+      def attribute_post_processing
+        process_parse
+        process_property
+        process_feature
+        process_mesh
+        process_children
+      end
+
+      def process_parse
+        return unless @parse
+        valid_type = %i(number boolean date)
+        unless @parse.is_a?(Hash) && (@parse.values - valid_type).empty?
+          raise ArgumentError, 'Invalid parse options for Data format'
         end
       end
 
-      def feature(*args, &block)
-        raise NoMethodError unless self.attributes.include?(:feature)
-        case args.size
-          when 0
-            @feature
-          when 1
-            @feature = args[0]
-            self.instance_eval(&block) if block_given?
-            self
-          else
-            raise ArgumentError
+      def process_property
+        return unless @property
+        unless @property.is_a?(String)
+          raise ArgumentError, 'Invalid JSON property'
         end
       end
 
-      def mesh(*args, &block)
-        raise NoMethodError unless self.attributes.include?(:mesh)
-        case args.size
-          when 0
-            @mesh
-          when 1
-            @mesh = args[0]
-            self.instance_eval(&block) if block_given?
-            self
-          else
-            raise ArgumentError
+      def process_feature
+        return unless @feature
+        unless @feature.is_a?(String)
+          raise ArgumentError, 'Invalid TopoJSON feature'
         end
       end
 
-      def children(*args, &block)
-        raise NoMethodError unless self.attributes.include?(:children)
-        case args.size
-          when 0
-            @children
-          when 1
-            @children = args[0]
-            self.instance_eval(&block) if block_given?
-            self
-          else
-            raise ArgumentError
+      def process_mesh
+        return unless @mesh
+        unless @mesh.is_a?(String)
+          raise ArgumentError, 'Invalid TopoJSON mesh'
+        end
+      end
+
+      def process_children
+        return unless @children
+        unless @children.is_a?(String)
+          raise ArgumentError, 'Invalid TreeJSON children'
         end
       end
 
