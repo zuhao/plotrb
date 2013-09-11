@@ -55,8 +55,14 @@ module Plotrb
       attributes.reject { |attr| self.instance_variable_get("@#{attr}").nil? }
     end
 
+    # to be implemented in each Plotrb class
+    def attribute_post_processing
+      raise NotImplementedError
+    end
+
     # @return [Hash] recursively construct a massive hash
     def collect_attributes
+      attribute_post_processing
       collected = {}
       defined_attributes.each do |attr|
         value = self.instance_variable_get("@#{attr}")
@@ -145,6 +151,10 @@ module Plotrb
 
     # monkey patch Hash class to support reverse_merge and collect_attributes
     class ::Hash
+
+      def attribute_post_processing
+        # nothing to do for Hash
+      end
 
       def reverse_merge(other_hash)
         other_hash.merge(self)
