@@ -24,13 +24,19 @@ module Plotrb
 
     def initialize(type, &block)
       @type = type
+      @extra_fields = []
       self.send(@type)
-      ::Plotrb::Kernel.transforms << self
       self.instance_eval(&block) if block_given?
+      ::Plotrb::Kernel.transforms << self
+      self
     end
 
     def type
       @type
+    end
+
+    def extra_fields
+      @extra_fields
     end
 
   private
@@ -222,7 +228,7 @@ module Plotrb
       # @!attributes default
       #   @return [] a default value to use if no matching key value is found
       add_attributes(:with, :as, :key, :with_key, :default)
-      define_single_val_attributes(:with, :as, :key, :with_key, :default)
+      define_single_val_attributes(:with, :as, :default, :key, :with_key)
       self.singleton_class.class_eval {
         alias_method :match, :key
         alias_method :against, :with_key
@@ -289,13 +295,14 @@ module Plotrb
     end
 
     def geopath
-      # @!attributes field
+      # @!attributes value
       #   @return [String] the data field containing the GeoJSON feature data
       # @!attributes (see #geo)
-      attr = [:field, :projection, :center, :translate, :scale, :rotate,
+      attr = [:value, :projection, :center, :translate, :scale, :rotate,
               :precision, :clip_angle]
       add_attributes(*attr)
       define_single_val_attributes(*attr)
+      @value ||= 'data'
     end
 
     def link
@@ -325,7 +332,6 @@ module Plotrb
       define_single_val_attribute(:value)
     end
 
-    # TODO: allow #reverse and #inside_out
     def stack
       # @!attributes point
       #   @return [String] the data field determining the points at which to
@@ -385,6 +391,173 @@ module Plotrb
               :rotate, :size, :text]
       add_attributes(*attr)
       define_single_val_attribute(*attr)
+    end
+
+    def attribute_post_processing
+      process_array_fields
+      process_copy_as
+      process_facet_keys
+      process_filter_test
+      process_fold_fields
+      process_slice_field
+      process_stats_value
+      process_unique_field
+      process_truncate_value
+      process_zip_key
+      process_zip_with_key
+      process_geo_lon
+      process_geo_lat
+      process_link_source
+      process_link_target
+      process_pie_value
+      process_stack_order
+      process_stack_point
+      process_stack_height
+      process_treemap_value
+      process_wordcloud_text
+      process_wordcloud_font_size
+    end
+
+    def process_array_fields
+      return unless @type == :array && @fields
+      @fields.collect! { |f| get_full_field_ref(f) }
+    end
+
+    def process_copy_as
+      return unless @type == :copy && @as && @fields
+      if @as.is_a?(Array) && @as.size != @fields.size
+        raise ArgumentError, 'Unmatched number of fields for copy transform'
+      end
+    end
+
+    def process_cross_with
+      return unless @type == :cross && @with
+      case @with
+        when String
+          unless ::Plotrb::Kernel.find_data(@with)
+            raise ArgumentError, 'Invalid data for cross transform'
+          end
+        when ::Plotrb::Data
+          @with = @with.name
+        else
+          raise ArgumentError, 'Invalid data for cross transform'
+      end
+    end
+
+    def process_facet_keys
+      return unless @type == :facet && @keys
+      @keys.collect! { |k| get_full_field_ref(k) }
+    end
+
+    def process_filter_test
+      return unless @type == :filter && @test
+      unless @test =~ /d\./
+        raise ArgumentError, 'Invalid filter test string, prefix with \'d.\''
+      end
+    end
+
+    def process_fold_fields
+      return unless @type == :fold && @fields
+      @fields.collect! { |f| get_full_field_ref(f) }
+    end
+
+    def process_slice_field
+      return unless @type == :slice && @field
+      @field = get_full_field_ref(@field)
+    end
+
+    def process_stats_value
+      return unless @type == :stats && @value
+      @value = get_full_field_ref(@value)
+    end
+
+    def process_unique_field
+      return unless @type == :unique && @field
+      @field = get_full_field_ref(@field)
+    end
+
+    def process_truncate_value
+      return unless @type == :truncate && @value
+      @value = get_full_field_ref(@value)
+    end
+
+    def process_zip_key
+      return unless @type == :zip && @key
+      @key = get_full_field_ref(@key)
+    end
+
+    def process_zip_with_key
+      return unless @type == :zip && @with_key
+      @with_key = get_full_field_ref(@with_key)
+    end
+
+    def process_geo_lon
+      return unless @type == :geo && @lon
+      @lon = get_full_field_ref(@lon)
+    end
+
+    def process_geo_lat
+      return unless @type == :geo && @lat
+      @lat = get_full_field_ref(@lat)
+    end
+
+    def process_link_source
+      return unless @type == :link && @source
+      @source = get_full_field_ref(@source)
+    end
+
+    def process_link_target
+      return unless @type == :link && @target
+      @target = get_full_field_ref(@target)
+    end
+
+    def process_pie_value
+      return unless @type == :pie && @value
+      @value = get_full_field_ref(@value)
+    end
+
+    def process_stack_order
+      return unless @order
+      case @order
+        when :default, 'default', :reverse, 'reverse'
+        when :inside_out, 'inside-out', 'inside_out'
+          @order = 'inside-out'
+        else
+          raise ArgumentError, 'Unsupported stack order'
+      end
+    end
+
+    def process_stack_point
+      return unless @type == :stack && @point
+      @point = get_full_field_ref(@point)
+    end
+
+    def process_stack_height
+      return unless @type == :stack && @height
+      @height = get_full_field_ref(@height)
+    end
+
+    def process_treemap_value
+      return unless @type == :treemap && @value
+      @value = get_full_field_ref(@value)
+    end
+
+    def process_wordcloud_text
+      return unless @type == :wordcloud && @text
+      @text = get_full_field_ref(@text)
+    end
+
+    def process_wordcloud_font_size
+      return unless @type == :wordcloud && @font_size
+      @font_size = get_full_field_ref(@font_size)
+    end
+
+    def get_full_field_ref(field)
+      if field.start_with?('data.') || extra_fields.include?(field.to_sym)
+        field
+      else
+        "data.#{field}"
+      end
     end
 
   end
