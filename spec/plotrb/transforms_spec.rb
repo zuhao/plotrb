@@ -22,8 +22,9 @@ describe 'Transform' do
     subject { Plotrb::Transform.new(:array) }
 
     it 'responds to #take' do
-      subject.take('foo_field', 'bar_field')
-      subject.fields.should match_array(['foo_field', 'bar_field'])
+      subject.take('foo', 'bar')
+      subject.send(:process_array_fields)
+      subject.fields.should match_array(['data.foo', 'data.bar'])
     end
 
   end
@@ -37,7 +38,10 @@ describe 'Transform' do
       subject.fields.should match_array(['foo_field', 'bar_field'])
     end
 
-    it 'raises error if as and fields are of different size'
+    it 'raises error if as and fields are of different size' do
+      subject.take('foo', 'bar').from('data').as('baz')
+      expect { subject.send(:process_copy_as) }.to raise_error(ArgumentError)
+    end
 
   end
 
@@ -45,7 +49,11 @@ describe 'Transform' do
 
     subject { Plotrb::Transform.new(:cross) }
 
-    it 'raises error if the secondary data does not exist'
+    it 'raises error if the secondary data does not exist' do
+      subject.with('foo')
+      ::Plotrb::Kernel.stub(:find_data).and_return(nil)
+      expect { subject.send(:process_cross_with) }.to raise_error(ArgumentError)
+    end
 
   end
 
@@ -55,7 +63,8 @@ describe 'Transform' do
 
     it 'responds to #group_by' do
       subject.group_by('foo', 'bar')
-      subject.keys.should match_array(['foo', 'bar'])
+      subject.send(:process_facet_keys)
+      subject.keys.should match_array(['data.foo', 'data.bar'])
     end
 
   end
@@ -64,7 +73,10 @@ describe 'Transform' do
 
     subject { Plotrb::Transform.new(:filter) }
 
-    it 'adds variable d if not present in the test expression'
+    it 'adds variable d if not present in the test expression' do
+      subject.test('x>10')
+      expect { subject.send(:process_filter_test) }.to raise_error(ArgumentError)
+    end
 
   end
 
@@ -80,7 +92,8 @@ describe 'Transform' do
 
     it 'responds to #into' do
       subject.into('foo', 'bar')
-      subject.fields.should match_array(['foo', 'bar'])
+      subject.send(:process_fold_fields)
+      subject.fields.should match_array(['data.foo', 'data.bar'])
     end
 
   end
@@ -138,7 +151,8 @@ describe 'Transform' do
 
     it 'responds to #from, #to, and #max_length' do
       subject.from('foo').to('bar').max_length(5)
-      subject.value.should == 'foo'
+      subject.send(:process_truncate_value)
+      subject.value.should == 'data.foo'
       subject.output.should == 'bar'
       subject.limit.should == 5
     end
@@ -156,7 +170,8 @@ describe 'Transform' do
 
     it 'responds to #from and #to' do
       subject.from('foo').to('bar')
-      subject.field.should == 'foo'
+      subject.send(:process_unique_field)
+      subject.field.should == 'data.foo'
       subject.as.should == 'bar'
     end
 
@@ -174,8 +189,10 @@ describe 'Transform' do
 
     it 'responds to #match and #against' do
       subject.with('foo').as('bar').match('foo_field').against('bar_field')
-      subject.key.should == 'foo_field'
-      subject.with_key.should == 'bar_field'
+      subject.send(:process_zip_key)
+      subject.send(:process_zip_with_key)
+      subject.key.should == 'data.foo_field'
+      subject.with_key.should == 'data.bar_field'
     end
 
   end
