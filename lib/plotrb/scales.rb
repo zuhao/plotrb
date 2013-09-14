@@ -211,6 +211,7 @@ module Plotrb
     end
 
     def process_domain_min
+      # only for quantitative domain
       return unless @domain_min && !%i(ordinal time utc).include?(@type)
       case @domain_min
         when String
@@ -232,6 +233,7 @@ module Plotrb
     end
 
     def process_domain_max
+      # only for quantitative domain
       return unless @domain_max && !%i(ordinal time utc).include?(@type)
       case @domain_max
         when String

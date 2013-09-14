@@ -11,7 +11,11 @@ describe 'Scale' do
       subject.name.should == 'foo_scale'
     end
 
-    it 'raises error if the name is not unique'
+    it 'raises error if the name is not unique' do
+      subject.name 'foo'
+      ::Plotrb::Kernel.stub(:duplicate_scale?).and_return(true)
+      expect { subject.send(:process_name) }.to raise_error(ArgumentError)
+    end
 
   end
 
@@ -27,20 +31,41 @@ describe 'Scale' do
 
     context 'when domain is a string reference to a data source' do
 
-      let(:data_ref) { ::Plotrb::Scale::DataRef }
+      before(:each) do
+        ::Plotrb::Kernel.stub(:find_data).and_return(::Plotrb::Data.new)
+      end
 
       it 'separates data source and data field' do
         subject.from('some_data.some_field')
+        ::Plotrb::Data.any_instance.stub(:extra_fields).and_return([])
+        subject.send(:process_domain)
         subject.domain.data.should == 'some_data'
         subject.domain.field.should == 'data.some_field'
       end
 
       it 'defaults field to index if not provided' do
         subject.from('some_data')
+        ::Plotrb::Data.any_instance.stub(:extra_fields).and_return([])
+        subject.send(:process_domain)
         subject.domain.data.should == 'some_data'
         subject.domain.field.should == 'index'
       end
 
+      it 'deals with index field properly' do
+        subject.from('some_data.index')
+        ::Plotrb::Data.any_instance.stub(:extra_fields).and_return([])
+        subject.send(:process_domain)
+        subject.domain.data.should == 'some_data'
+        subject.domain.field.should == 'index'
+      end
+
+      it 'recognizes extra fields added by transform' do
+        subject.from('some_data.field')
+        ::Plotrb::Data.any_instance.stub(:extra_fields).and_return([:field])
+        subject.send(:process_domain)
+        subject.domain.data.should == 'some_data'
+        subject.domain.field.should == 'field'
+      end
     end
 
     context 'when domain is actual ordinal/categorical data' do
@@ -70,6 +95,7 @@ describe 'Scale' do
 
       it 'sets range as a two-element array' do
         subject.to([1,100])
+        subject.send(:process_range)
         subject.range.should == [1,100]
       end
 
@@ -80,6 +106,7 @@ describe 'Scale' do
       it 'sets range directly' do
         range_set = %w(foo bar baz qux)
         subject.to(range_set)
+        subject.send(:process_range)
         subject.range.should == range_set
       end
 
@@ -88,12 +115,9 @@ describe 'Scale' do
     context 'when range is special literal' do
 
       it 'sets correct range literal' do
-        subject.to_colors
-        subject.range.should == :category10
         subject.to_more_colors
+        subject.send(:process_range)
         subject.range.should == :category20
-        subject.to_shapes
-        subject.range.should == :shapes
       end
 
       it 'does not set invalid range literal' do
@@ -158,20 +182,6 @@ describe 'Scale' do
       subject.to_colors
     end
 
-  end
-
-  it 'allows block-style DSL' do
-    subject.name('some_scale') do
-      from('some_data_file.some_field').to_width
-      reverse
-      nicely
-    end
-    subject.name.should == 'some_scale'
-    subject.domain.data.should == 'some_data_file'
-    subject.domain.field.should == 'data.some_field'
-    subject.range.should == :width
-    subject.reverse.should be_true
-    subject.nice?.should be_true
   end
 
 end
