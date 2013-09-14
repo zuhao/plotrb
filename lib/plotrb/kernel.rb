@@ -62,7 +62,7 @@ module Plotrb
 
     def method_missing(method, *args, &block)
       case method.to_s
-        when /^(\w+)_axis$/
+        when /^(\w)_axis$/
           # Initialize ::Plotrb::Axis objects
           if ::Plotrb::Axis::TYPES.include?($1.to_sym)
             cache_method($1, 'axis')

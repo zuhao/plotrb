@@ -81,6 +81,10 @@ module Plotrb
       self
     end
 
+    def type
+      @type
+    end
+
     def above(&block)
       @layer = :front
       self.instance_eval(&block) if block_given?
