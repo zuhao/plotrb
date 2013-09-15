@@ -44,7 +44,7 @@ module Plotrb
     end
 
     def extra_fields
-      @extra_fields ||= []
+      @extra_fields ||= [:index]
       @extra_fields.concat(@transform.collect { |t| t.extra_fields }).uniq!
     end
 
