@@ -7,7 +7,7 @@ module Plotrb
     include ::Plotrb::Base
 
     # all available types of marks defined by Vega
-    TYPES = %i(rect symbol path arc area line image text)
+    TYPES = %i(rect symbol path arc area line image text group)
 
     TYPES.each do |t|
       define_singleton_method(t) do |&block|
@@ -45,6 +45,7 @@ module Plotrb
                                    :group)
       define_multi_val_attributes(:from)
       if @type == :group
+        add_attributes(:scales, :axes, :marks)
         define_multi_val_attributes(:scales, :axes, :marks)
       end
       ::Plotrb::Kernel.marks << self
