@@ -24,7 +24,7 @@ module Plotrb
 
     def initialize(type, &block)
       @type = type
-      @extra_fields = []
+      @extra_fields = [:index, :data]
       self.send(@type)
       self.instance_eval(&block) if block_given?
       ::Plotrb::Kernel.transforms << self
@@ -330,6 +330,7 @@ module Plotrb
       add_attributes(:sort, :value)
       define_boolean_attribute(:sort)
       define_single_val_attribute(:value)
+      @extra_fields.concat([:start_angle, :end_angle])
     end
 
     def stack
@@ -512,8 +513,12 @@ module Plotrb
     end
 
     def process_pie_value
-      return unless @type == :pie && @value
-      @value = get_full_field_ref(@value)
+      return unless @type == :pie
+      if @value
+        @value = get_full_field_ref(@value)
+      else
+        @value = 'data'
+      end
     end
 
     def process_stack_order
@@ -553,10 +558,17 @@ module Plotrb
     end
 
     def get_full_field_ref(field)
-      if field.start_with?('data.') || extra_fields.include?(field.to_sym)
-        field
-      else
-        "data.#{field}"
+      case field
+        when String
+          if field.start_with?('data.') || extra_fields.include?(field.to_sym)
+            field
+          else
+            "data.#{field}"
+          end
+        when ::Plotrb::Data
+          'data'
+        else
+          raise ArgumentError, 'Invalid data field'
       end
     end
 

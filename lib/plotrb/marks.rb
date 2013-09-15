@@ -62,29 +62,37 @@ module Plotrb
     end
 
     def enter(&block)
+      process_from
       @properties.merge!(
-          { enter: ::Plotrb::Mark::MarkProperty.new(@type, @from, &block) }
+          { enter: ::Plotrb::Mark::MarkProperty.
+              new(@type, @from[:data], &block) }
       )
       self
     end
 
     def exit(&block)
+      process_from
       @properties.merge!(
-          { exit: ::Plotrb::Mark::MarkProperty.new(@type, @from, &block) }
+          { exit: ::Plotrb::Mark::MarkProperty.
+              new(@type, @from[:data], &block) }
       )
       self
     end
 
     def update(&block)
+      process_from
       @properties.merge!(
-          { update: ::Plotrb::Mark::MarkProperty.new(@type, @from, &block) }
+          { update: ::Plotrb::Mark::MarkProperty.
+              new(@type, @from[:data], &block) }
       )
       self
     end
 
     def hover(&block)
+      process_from
       @properties.merge!(
-          { hover: ::Plotrb::Mark::MarkProperty.new(@type, @from, &block) }
+          { hover: ::Plotrb::Mark::MarkProperty.
+              new(@type, @from[:data], &block) }
       )
       self
     end
@@ -105,7 +113,7 @@ module Plotrb
     end
 
     def process_from
-      return unless @from
+      return unless @from && !@from_processed
       from = {}
       @from.each do |f|
         case f
@@ -125,6 +133,7 @@ module Plotrb
         end
       end
       @from = from
+      @from_processed = true
     end
 
     def process_group
@@ -383,7 +392,7 @@ module Plotrb
         def process_field
           return unless @field
           case @field
-            when String
+            when String, Symbol
               @field = get_full_field_ref(@field)
             when Hash
               if @field[:group]
@@ -418,10 +427,16 @@ module Plotrb
         end
 
         def get_full_field_ref(field)
-          data = ::Plotrb::Kernel.find_data(@data)
-          if field.start_with?('data.') ||
-              data.extra_fields.include?(field.to_sym)
+          data = if @data.is_a?(::Plotrb::Data)
+                   @data
+                 else
+                   ::Plotrb::Kernel.find_data(@data)
+                 end
+          extra_fields = (data.extra_fields if data) || []
+          if field.to_s.start_with?('data.')
             field
+          elsif extra_fields.include?(field.to_sym)
+            classify(field, :json)
           else
             "data.#{field}"
           end

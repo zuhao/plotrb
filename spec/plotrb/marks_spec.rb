@@ -21,6 +21,8 @@ describe 'Mark' do
   describe 'properties' do
 
     it 'allows multiple properties' do
+      ::Plotrb::Kernel.stub(:find_data).with('some_data').and_return(true)
+      subject.from('some_data')
       subject.enter
       subject.exit
       subject.properties.keys.should match_array([:enter, :exit])

@@ -44,8 +44,12 @@ module Plotrb
     end
 
     def extra_fields
-      @extra_fields ||= [:index]
-      @extra_fields.concat(@transform.collect { |t| t.extra_fields }).uniq!
+      @extra_fields ||= [:data, :index]
+      if @transform
+        @extra_fields.concat(@transform.collect { |t| t.extra_fields }).
+            flatten!.uniq!
+      end
+      @extra_fields
     end
 
     def method_missing(method, *args, &block)

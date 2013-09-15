@@ -28,11 +28,7 @@ module Plotrb
     add_attributes :name, :width, :height, :viewport, :padding, :data, :scales,
                   :marks, :axes
 
-    def initialize(args={}, &block)
-      default = {width: 500, height: 500}
-      args.reverse_merge(default).each do |k, v|
-        self.instance_variable_set("@#{k}", v) if self.attributes.include?(k)
-      end
+    def initialize(&block)
       define_single_val_attributes(:name, :width, :height, :viewport, :padding)
       define_multi_val_attributes(:data, :scales, :marks, :axes)
       self.instance_eval(&block) if block_given?
@@ -44,6 +40,12 @@ module Plotrb
       else
         JSON.generate(self.collect_attributes)
       end
+    end
+
+  private
+
+    def attribute_post_processing
+
     end
 
   end

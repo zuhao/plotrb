@@ -166,6 +166,10 @@ module Plotrb
           json_attr = classify(k, :json)
           if v.respond_to?(:collect_attributes)
             collected[json_attr] = v.collect_attributes
+          elsif v.is_a?(Array)
+            collected[json_attr] = [].concat(v.collect{ |va|
+              va.respond_to?(:collect_attributes) ? va.collect_attributes : va
+            })
           else
             collected[json_attr] = v
           end
