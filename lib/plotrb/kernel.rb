@@ -43,6 +43,16 @@ module Plotrb
       @marks ||= []
     end
 
+    # @return [Mark] find Mark object by name
+    def self.find_mark(name)
+      @marks.find { |m| m.name == name.to_s }
+    end
+
+    # @return [Boolean] if a Mark object with same name already exists
+    def self.duplicate_mark?(name)
+      @marks.select { |m| m.name == name.to_s }.size > 1
+    end
+
     # a global space keeping track of all Transform objects defined
     def self.transforms
       @transforms ||= []
