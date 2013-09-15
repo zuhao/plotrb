@@ -93,6 +93,7 @@ module Plotrb
     def attribute_post_processing
       process_name
       process_from
+      process_group
     end
 
     def process_name
@@ -123,6 +124,23 @@ module Plotrb
         end
       end
       @from = from
+    end
+
+    def process_group
+      return unless @scales
+      unless @scales.all? { |s| s.is_a?(::Plotrb::Scale) }
+        raise ArgumentError, 'Invalid scales fro group mark'
+      end
+
+      return unless @axes
+      unless @axes.all? { |s| s.is_a?(::Plotrb::Axis) }
+        raise ArgumentError, 'Invalid axes fro group mark'
+      end
+
+      return unless @marks
+      unless @marks.all? { |s| s.is_a?(::Plotrb::Mark) }
+        raise ArgumentError, 'Invalid marks fro group mark'
+      end
     end
 
     class MarkProperty
