@@ -107,6 +107,7 @@ module Plotrb
       add_attributes(:fields)
       define_multi_val_attribute(:fields)
       self.singleton_class.class_eval { alias_method :into, :fields }
+      @extra_fields.concat([:key, :value])
     end
 
     def formula
@@ -157,6 +158,8 @@ module Plotrb
         alias_method :store_stats, :assign
         alias_method :store_stats?, :assign?
       }
+      @extra_fields.concat([:count, :min, :max, :sum, :mean, :variance, :stdev,
+                            :median])
     end
 
     def truncate
@@ -303,6 +306,7 @@ module Plotrb
       add_attributes(*attr)
       define_single_val_attributes(*attr)
       @value ||= 'data'
+      @extra_fields.concat([:path])
     end
 
     def link
@@ -320,6 +324,7 @@ module Plotrb
       attr = [:source, :target, :shape, :tension]
       add_attributes(*attr)
       define_single_val_attributes(*attr)
+      @extra_fields.concat([:path])
     end
 
     def pie
@@ -346,6 +351,7 @@ module Plotrb
       attr = [:point, :height, :offset, :order]
       add_attributes(*attr)
       define_single_val_attributes(*attr)
+      @extra_fields.concat([:y, :y2])
     end
 
     def treemap
@@ -368,6 +374,7 @@ module Plotrb
       add_attributes(:padding, :ratio, :round, :size, :sticky, :value)
       define_single_val_attributes(:padding, :ratio, :size, :value)
       define_boolean_attributes(:round, :sticky)
+      @extra_fields.concat([:x, :y, :width, :height])
     end
 
     def wordcloud
@@ -392,6 +399,7 @@ module Plotrb
               :rotate, :size, :text]
       add_attributes(*attr)
       define_single_val_attribute(*attr)
+      @extra_fields.concat([:x, :y, :font_size, :font, :angle])
     end
 
     def attribute_post_processing
