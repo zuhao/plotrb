@@ -44,9 +44,10 @@ Currently, Plotrb is intended to generate JSON specification for Vega. If you wo
 Note that Plotrb is a work in progress, so we can't guarantee that every
 example will work exactly.
 
-* {Bar}[http://wanzuhao.com/posts/plotrb-example-bar/]
 * {Arc}[http://wanzuhao.com/posts/plotrb-exampe-arc/]
 * {Area}[http://wanzuhao.com/posts/plotrb-example-area/]
+* {Bar}[http://wanzuhao.com/posts/plotrb-example-bar/]
+* {Barley}[]
 * {Lifelines}[http://wanzuhao.com/posts/plotrb-exampe-lifelines/]
 
 Examples may also be found in the `examples/` directory.
