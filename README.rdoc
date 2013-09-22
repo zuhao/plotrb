@@ -1,0 +1,72 @@
+= Plotrb
+
+Vega/D3-based plotting gem for Ruby
+
+* {sciruby.com}[http://sciruby.com]
+* {Google+}[https://plus.google.com/109304769076178160953/posts]
+* {Wan Zuhao}[http://www.wanzuhao.com]
+
+{<img src=https://travis-ci.org/zuhao/plotrb.png>}[https://travis-ci.org/zuhao/plotrb]
+
+== Description
+
+Plotrb is an experimental plotting library for the Ruby language. It
+brings {the simplicity of Vega}[http://trifacta.github.io/vega/] and
+{the power of D3}[http://d3js.org/] to the Ruby science community, to
+allow for {fast, customizable design; reusability and shareability; programmatic generation of visualizations; and improved performance and platform flexibility}[https://github.com/trifacta/vega/wiki/Vega-and-D3].
+
+Plotrb is in many ways the child of
+{Rubyvis}[http://github.com/SciRuby/rubyvis] (the Ruby port of
+Protovis). However, it improves upon Rubyvis in that it uses a DSL that
+will be much more familiar and natural to Ruby coders.
+
+Plotrb was created by Wan Zuhao as part of Google's Summer of Code 2013.
+It is part of {SciRuby}[http://sciruby.com].
+
+== Installation
+
+Add this line to your application's Gemfile:
+
+    gem 'plotrb'
+
+And then execute:
+
+    bundle
+
+Or install it yourself as:
+
+    gem install plotrb
+
+== Usage
+
+Note that Plotrb is a work in progress, so we can't guarantee that every
+example will work exactly.
+
+* {Bar}[http://wanzuhao.com/posts/plotrb-example-bar/]
+* {Area}[http://wanzuhao.com/posts/plotrb-example-area/]
+* {Lifelines}[http://wanzuhao.com/posts/plotrb-exampe-lifelines/]
+
+Examples may also be found in the `examples/` directory.
+
+== Contributing
+
+1. Fork it
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Add some feature'`)
+4. Push to the branch (`git push origin my-new-feature`)
+5. Create new Pull Request
+
+== License
+
+Copyright (c) 2013, Wan Zuhao and the Ruby Science Foundation.
+
+All rights reserved.
+
+Plotrb, along with SciRuby, is licensed under the BSD 2-clause license. See
+{LICENSE.txt}[https://github.com/SciRuby/sciruby/wiki/License] for details.
+
+== Donations
+
+Support a SciRuby Fellow:
+
+{<img src=http://pledgie.com/campaigns/15783.png?skin_name=chrome>}[http://www.pledgie.com/campaigns/15783]
