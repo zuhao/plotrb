@@ -8,9 +8,9 @@ Gem::Specification.new do |spec|
   spec.authors       = ['Zuhao Wan']
   spec.email         = 'wanzuhao@gmail.com'
   spec.description   = %q{Plotrb is a plotting tool in Ruby.}
-  spec.summary       = %q{Plotrb is a plotting tool in Ruby, built on D3.}
-  spec.homepage      = 'https://github.com/zuhao/plotrb'
-  spec.license       = 'MIT'
+  spec.summary       = %q{Plotrb is a plotting tool in Ruby, built on Vega and D3, and is part of the SciRuby Project.}
+  spec.homepage      = 'https://github.com/sciruby/plotrb'
+  spec.license       = 'BSD 2-clause'
 
   spec.files         = `git ls-files`.split($/)
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
@@ -24,3 +24,4 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'yajl-ruby'
   spec.add_dependency 'activemodel'
 end
+
