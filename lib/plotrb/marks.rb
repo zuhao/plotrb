@@ -63,36 +63,40 @@ module Plotrb
 
     def enter(&block)
       process_from
+      data = @from[:data] if @from
       @properties.merge!(
           { enter: ::Plotrb::Mark::MarkProperty.
-              new(@type, @from[:data], &block) }
+              new(@type, data, &block) }
       )
       self
     end
 
     def exit(&block)
       process_from
+      data = @from[:data] if @from
       @properties.merge!(
           { exit: ::Plotrb::Mark::MarkProperty.
-              new(@type, @from[:data], &block) }
+              new(@type, data, &block) }
       )
       self
     end
 
     def update(&block)
       process_from
+      data = @from[:data] if @from
       @properties.merge!(
           { update: ::Plotrb::Mark::MarkProperty.
-              new(@type, @from[:data], &block) }
+              new(@type, data, &block) }
       )
       self
     end
 
     def hover(&block)
       process_from
+      data = @from[:data] if @from
       @properties.merge!(
           { hover: ::Plotrb::Mark::MarkProperty.
-              new(@type, @from[:data], &block) }
+              new(@type, data, &block) }
       )
       self
     end
@@ -139,17 +143,17 @@ module Plotrb
     def process_group
       return unless @scales
       unless @scales.all? { |s| s.is_a?(::Plotrb::Scale) }
-        raise ArgumentError, 'Invalid scales fro group mark'
+        raise ArgumentError, 'Invalid scales for group mark'
       end
 
       return unless @axes
       unless @axes.all? { |s| s.is_a?(::Plotrb::Axis) }
-        raise ArgumentError, 'Invalid axes fro group mark'
+        raise ArgumentError, 'Invalid axes for group mark'
       end
 
       return unless @marks
       unless @marks.all? { |s| s.is_a?(::Plotrb::Mark) }
-        raise ArgumentError, 'Invalid marks fro group mark'
+        raise ArgumentError, 'Invalid marks for group mark'
       end
     end
 
@@ -195,7 +199,7 @@ module Plotrb
       add_attributes *VISUAL_PROPERTIES
       attr_reader :data
 
-      def initialize(type, data, &block)
+      def initialize(type, data=nil, &block)
         define_single_val_attributes *VISUAL_PROPERTIES
         self.singleton_class.class_eval {
           alias_method :x_start, :x
@@ -219,6 +223,10 @@ module Plotrb
       end
 
       def rect
+        # no additional attributes
+      end
+
+      def group
         # no additional attributes
       end
 

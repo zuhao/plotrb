@@ -205,6 +205,8 @@ module Plotrb
           else
             # leave as it is
           end
+        when ::Plotrb::Scale::DataRef
+          # leave as it is
         else
           raise ArgumentError, 'Unsupported Scale domain type'
       end

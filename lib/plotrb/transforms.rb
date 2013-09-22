@@ -86,6 +86,7 @@ module Plotrb
       add_attributes(:keys, :sort)
       define_multi_val_attributes(:keys, :sort)
       self.singleton_class.class_eval { alias_method :group_by, :keys }
+      @extra_fields.concat([:key])
     end
 
     def filter
