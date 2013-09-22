@@ -39,10 +39,13 @@ Or install it yourself as:
 
 == Usage
 
+Currently, Plotrb is intended to generate JSON specification for Vega. If you would like to see the visualization rendered in PNG or SVG, you will have to install {Vega}[https://github.com/trifacta/vega] and use its {Headless Mode}[https://github.com/trifacta/vega/wiki/Headless-Mode].
+
 Note that Plotrb is a work in progress, so we can't guarantee that every
 example will work exactly.
 
 * {Bar}[http://wanzuhao.com/posts/plotrb-example-bar/]
+* {Arc}[http://wanzuhao.com/posts/plotrb-exampe-arc/]
 * {Area}[http://wanzuhao.com/posts/plotrb-example-area/]
 * {Lifelines}[http://wanzuhao.com/posts/plotrb-exampe-lifelines/]
 
