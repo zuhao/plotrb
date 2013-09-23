@@ -5,6 +5,7 @@ Vega/D3-based plotting gem for Ruby
 * {sciruby.com}[http://sciruby.com]
 * {Google+}[https://plus.google.com/109304769076178160953/posts]
 * {Wan Zuhao}[http://www.wanzuhao.com]
+* {Examples on bl.ocks.org}[http://bl.ocks.org/zuhao]
 
 {<img src=https://travis-ci.org/zuhao/plotrb.png>}[https://travis-ci.org/zuhao/plotrb]
 
@@ -44,11 +45,11 @@ Currently, Plotrb is intended to generate JSON specification for Vega. If you wo
 Note that Plotrb is a work in progress, so we can't guarantee that every
 example will work exactly.
 
-* {Arc}[http://wanzuhao.com/posts/plotrb-exampe-arc/]
-* {Area}[http://wanzuhao.com/posts/plotrb-example-area/]
-* {Bar}[http://wanzuhao.com/posts/plotrb-example-bar/]
-* {Barley}[]
-* {Lifelines}[http://wanzuhao.com/posts/plotrb-exampe-lifelines/]
+* {Arc}[http://bl.ocks.org/zuhao/6663966]
+* {Area}[http://bl.ocks.org/zuhao/6663999]
+* {Bar}[http://bl.ocks.org/zuhao/6662333]
+* {Barley}[http://bl.ocks.org/zuhao/6664828]
+* {Lifelines}[http://bl.ocks.org/zuhao/6664107]
 
 Examples may also be found in the `examples/` directory.
 
