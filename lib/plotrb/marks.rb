@@ -443,7 +443,7 @@ module Plotrb
           extra_fields = (data.extra_fields if data) || []
           if field.to_s.start_with?('data.')
             field
-          elsif extra_fields.include?(field.to_sym)
+          elsif extra_fields.include?(field.split('.')[0].to_sym)
             classify(field, :json)
           else
             "data.#{field}"

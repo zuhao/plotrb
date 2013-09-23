@@ -285,6 +285,7 @@ module Plotrb
     end
 
     def is_data_ref?(ref)
+      return false unless ref.is_a?(String)
       source, _ = ref.split('.', 2)
       not ::Plotrb::Kernel.find_data(source).nil?
     end

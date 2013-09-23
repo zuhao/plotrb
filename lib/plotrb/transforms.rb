@@ -415,6 +415,7 @@ module Plotrb
       process_truncate_value
       process_zip_key
       process_zip_with_key
+      process_zip_as
       process_geo_lon
       process_geo_lat
       process_link_source
@@ -499,6 +500,11 @@ module Plotrb
     def process_zip_with_key
       return unless @type == :zip && @with_key
       @with_key = get_full_field_ref(@with_key)
+    end
+
+    def process_zip_as
+      return unless @type == :zip && @as
+      @extra_fields.concat([@as.to_sym])
     end
 
     def process_geo_lon
