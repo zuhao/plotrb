@@ -4,7 +4,7 @@ Vega/D3-based plotting gem for Ruby
 
 * {sciruby.com}[http://sciruby.com]
 * {Google+}[https://plus.google.com/109304769076178160953/posts]
-* {Wan Zuhao}[http://www.wanzuhao.com]
+* {Wan Zuhao}[]
 * {Examples on bl.ocks.org}[http://bl.ocks.org/zuhao]
 
 {<img src=https://travis-ci.org/zuhao/plotrb.png>}[https://travis-ci.org/zuhao/plotrb]
